@@ -42,6 +42,10 @@ const adminSchema = new mongoose.Schema(
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+    profileImage: {
+      type: String,
+      default: "",
+    },
     isVerified: {
       type: Boolean,
       default: false,
@@ -56,7 +60,10 @@ const adminSchema = new mongoose.Schema(
       type: Date,
       default: null,
       select: false,
-    }
+    },
+    lastLogin: {
+      type: Date,
+    },
   },
   {
     timestamps: true, 

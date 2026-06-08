@@ -60,15 +60,33 @@ const facultySchema = new mongoose.Schema(
       required: [true, "Department is required"],
       trim: true,
     },
-    designation: {
+    qualification: {
       type: String,
-      required: [true, "Designation is required"],
-      trim: true, // e.g., Professor, Assistant Professor, Lecturer
+      required: true,
+      trim: true,
+    },
+    salary: {
+      type: Number,
+      required: true,
+    },
+    subjects: [
+      {
+        type: String,
+      },
+    ],
+
+    experience: {
+      type: Number,
+      default: 0,
     },
     status: {
       type: String,
       enum: ["Active", "Inactive", "Retired", "Resigned"],
       default: "Active",
+    },
+    profileImage: {
+      type: String,
+      default: "",
     },
     joiningDate: {
       type: Date,
@@ -91,7 +109,7 @@ const facultySchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 
