@@ -8,7 +8,7 @@ const {email, password, studentId} = req.body;
 const studentExists = await Student.findOne({
   $or: [
     { email },
-    { password },
+    { password },3
     { studentId }
   ]
 });
