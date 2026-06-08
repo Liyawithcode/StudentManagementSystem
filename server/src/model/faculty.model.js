@@ -92,6 +92,9 @@ const facultySchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    lastLogin: {
+      type: Date,
+    },
     isVerified: {
       type: Boolean,
       default: false,
