@@ -1,5 +1,20 @@
 import mongoose from "mongoose";
 
+
+const subjectSchema = new mongoose.Schema(
+     {
+     subjectName: {
+    type: String,
+    required: true,
+  },
+  marks: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 100,
+  },
+});
+
 const resultSchema = new mongoose.Schema(
     {
         studentId: 
@@ -8,12 +23,14 @@ const resultSchema = new mongoose.Schema(
              required: true,
              trim: true
         },
-        courseId: 
+        courseName: 
         {
              type: String, 
              required: true,
              trim: true
         },
+          subjects: [subjectSchema],
+
         totalMarks: 
         {
              type: Number, 
@@ -34,6 +51,12 @@ const resultSchema = new mongoose.Schema(
              type: String, 
              required: true
         },
+        resultStatus: 
+        {
+             type: String, 
+             default: "Pass",
+             enum: ["Pass", "Fail"]
+        }
     },
     { timestamps: true }
 );
