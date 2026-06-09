@@ -1,7 +1,6 @@
-import { Student } from "../model/student.model.js";
+import studentService from "../services/student.services.js";
 import bcrypt from "bcrypt";
 
-// Create a new student (Registration)
 export const createStudent = async (req, res, next) => {
   try {
     const {
@@ -17,10 +16,8 @@ export const createStudent = async (req, res, next) => {
       department,
     } = req.body;
 
-    // Check if student already exists by email or studentId
-    const studentExists = await Student.findOne({
-      $or: [{ email }, { studentId }],
-    });
+  
+    const studentExists = await studentService.checkStudentExists(email, studentId);
 
     if (studentExists) {
       return res.status(400).json({
@@ -29,10 +26,10 @@ export const createStudent = async (req, res, next) => {
       });
     }
 
-    // Hash password
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newStudent = await Student.create({
+    const newStudent = await studentService.createStudentService({
       studentId,
       firstName,
       lastName,
@@ -45,9 +42,6 @@ export const createStudent = async (req, res, next) => {
       department,
     });
 
-    // Remove password from response
-    newStudent.password = undefined;
-
     res.status(201).json({
       success: true,
       message: "Student created successfully",
@@ -58,10 +52,9 @@ export const createStudent = async (req, res, next) => {
   }
 };
 
-// Get all students
 export const getAllStudents = async (req, res, next) => {
   try {
-    const students = await Student.find();
+    const students = await studentService.getAllStudentsService();
     res.status(200).json({
       success: true,
       count: students.length,
@@ -72,10 +65,10 @@ export const getAllStudents = async (req, res, next) => {
   }
 };
 
-// Get a single student by ID
+
 export const getStudentById = async (req, res, next) => {
   try {
-    const student = await Student.findById(req.body);
+    const student = await studentService.getStudentByIdService(req.body);
 
     if (!student) {
       return res.status(404).json({
@@ -93,10 +86,16 @@ export const getStudentById = async (req, res, next) => {
   }
 };
 
-// Update a student
 export const updateStudent = async (req, res, next) => {
   try {
-    let student = await Student.findByIdId(req.body);
+    const updateData = { ...req.body };
+
+  
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    let student = await studentService.updateStudentService(req.body, updateData);
 
     if (!student) {
       return res.status(404).json({
@@ -104,20 +103,6 @@ export const updateStudent = async (req, res, next) => {
         message: "Student not found",
       });
     }
-
-    // If password is being updated, hash it
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      req.body.password = await bcrypt.hash(req.body.password, salt);
-    }
-
-    student = await Student.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    // Remove password from response
-    student.password = undefined;
 
     res.status(200).json({
       success: true,
@@ -129,10 +114,9 @@ export const updateStudent = async (req, res, next) => {
   }
 };
 
-// Delete a student
 export const deleteStudent = async (req, res, next) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await studentService.deleteStudentService(req.params.id);
 
     if (!student) {
       return res.status(404).json({
@@ -140,8 +124,6 @@ export const deleteStudent = async (req, res, next) => {
         message: "Student not found",
       });
     }
-
-    await student.deleteOne();
 
     res.status(200).json({
       success: true,
@@ -152,5 +134,3 @@ export const deleteStudent = async (req, res, next) => {
   }
 };
 
-// Alias for registration if originally named StudentController
-export const StudentController = createStudent;
