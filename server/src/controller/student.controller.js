@@ -1,136 +1,96 @@
-import studentService from "../services/student.services.js";
-import bcrypt from "bcrypt";
+import { Student } from '../model/student.model.js';
+import { generateToken } from '../utils/generateToken.js';
 
-export const createStudent = async (req, res, next) => {
+
+// REGISTER STUDENT
+export const registerStudent = async (req, res) => {
   try {
-    const {
-      studentId,
-      firstName,
-      lastName,
-      email,
-      password,
-      role,
-      gender,
-      dateOfBirth,
-      phone,
-      department,
-    } = req.body;
-
-  
-    const studentExists = await studentService.checkStudentExists(email, studentId);
+    const studentExists = await Student.findOne({
+      email: req.body.email,
+    });
 
     if (studentExists) {
       return res.status(400).json({
-        success: false,
         message: "Student already exists",
       });
     }
 
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newStudent = await studentService.createStudentService({
-      studentId,
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      role,
-      gender,
-      dateOfBirth,
-      phone,
-      department,
-    });
+    const student = await Student.create(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Student created successfully",
-      data: newStudent,
+      student,
+      token: generateToken(student),
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-export const getAllStudents = async (req, res, next) => {
+// LOGIN STUDENT
+exports.loginStudent = async (req, res) => {
   try {
-    const students = await studentService.getAllStudentsService();
-    res.status(200).json({
-      success: true,
-      count: students.length,
-      data: students,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+    const { email, password } = req.body;
 
-
-export const getStudentById = async (req, res, next) => {
-  try {
-    const student = await studentService.getStudentByIdService(req.body);
+    const student = await Student.findOne({ email });
 
     if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
+      return res.status(400).json({ message: "Invalid email" });
     }
 
-    res.status(200).json({
+    const isMatch = await student.matchPassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+
+    res.json({
       success: true,
-      data: student,
+      student,
+      token: generateToken(student),
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-export const updateStudent = async (req, res, next) => {
-  try {
-    const updateData = { ...req.body };
-
-  
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
-    }
-
-    let student = await studentService.updateStudentService(req.body, updateData);
-
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Student updated successfully",
-      data: student,
-    });
-  } catch (error) {
-    next(error);
-  }
+// GET ALL STUDENTS (ADMIN)
+exports.getAllStudents = async (req, res) => {
+  const students = await Student.find();
+  res.json(students);
 };
 
-export const deleteStudent = async (req, res, next) => {
-  try {
-    const student = await studentService.deleteStudentService(req.params.id);
+// GET STUDENT BY ID
+exports.getStudentById = async (req, res) => {
+  const student = await Student.findById(req.body.studentId);
 
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Student deleted successfully",
-    });
-  } catch (error) {
-    next(error);
+  if (!student) {
+    return res.status(404).json({ message: "Student not found" });
   }
+
+  res.json(student);
 };
 
+// UPDATE STUDENT
+exports.updateStudent = async (req, res) => {
+  const student = await Student.findByIdAndUpdate(
+    req.body.studentId,
+    req.body,
+    { new: true }
+  );
+
+  res.json({
+    success: true,
+    student,
+  });
+};
+
+// DELETE STUDENT
+exports.deleteStudent = async (req, res) => {
+  await Student.findByIdAndDelete(req.body.studentId);
+
+  res.json({
+    success: true,
+    message: "Student deleted successfully",
+  });
+};
