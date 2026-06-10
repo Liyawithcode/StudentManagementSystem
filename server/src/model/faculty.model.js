@@ -34,7 +34,7 @@ const facultySchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["faculty", "admin"],
+      enum: ["faculty"],
       default: "faculty",
     },
     gender: {
