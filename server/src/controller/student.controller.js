@@ -2,22 +2,11 @@ import Student from "../model/student.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 
+// Register Student
 export const registerStudent = async (req, res) => {
   try {
-    const {
-      studentId,
-      firstName,
-      lastName,
-      email,
-      password,
-      role,
-      gender,
-      dateOfBirth,
-      phone,
-      department,
-    } = req.body;
+    const { email, password, ...studentData } = req.body;
 
-    // check if student exists
     const existingStudent = await Student.findOne({ email });
 
     if (existingStudent) {
@@ -27,20 +16,12 @@ export const registerStudent = async (req, res) => {
       });
     }
 
-    // hash password manually (optional, schema also handles it)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const student = await Student.create({
-      studentId,
-      firstName,
-      lastName,
+      ...studentData,
       email,
       password: hashedPassword,
-      role,
-      gender,
-      dateOfBirth,
-      phone,
-      department,
     });
 
     res.status(201).json({
@@ -57,6 +38,7 @@ export const registerStudent = async (req, res) => {
   }
 };
 
+// Login Student
 export const loginStudent = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -82,14 +64,7 @@ export const loginStudent = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      student: {
-        id: student._id,
-        studentId: student.studentId,
-        firstName: student.firstName,
-        lastName: student.lastName,
-        email: student.email,
-        role: student.role,
-      },
+      student,
       token: generateToken(student),
     });
   } catch (error) {
@@ -100,14 +75,13 @@ export const loginStudent = async (req, res) => {
   }
 };
 
-
+// Get All Students
 export const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find();
 
     res.status(200).json({
       success: true,
-      count: students.length,
       students,
     });
   } catch (error) {
@@ -118,16 +92,17 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-
-export const getStudentById = async (req, res) => {
+// Get Student
+export const getStudent = async (req, res) => {
   try {
-    const getstudent = req.body;
-    const student = await Student.findOne({ getstudent });
+    const { studentId } = req.body;
+
+    const student = await Student.findOne({ studentId });
 
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found", 
+        message: "Student not found",
       });
     }
 
@@ -143,14 +118,14 @@ export const getStudentById = async (req, res) => {
   }
 };
 
-
+// Update Student
 export const updateStudent = async (req, res) => {
   try {
-    const upstudent = req.body;
-    // const { firstName, lastName, email, password, role, gender, dateOfBirth, phone, department } = req.body;
+    const { studentId, ...updateData } = req.body;
 
     const student = await Student.findOneAndUpdate(
-      {upstudent},
+      { studentId },
+      updateData,
       { new: true }
     );
 
@@ -174,11 +149,12 @@ export const updateStudent = async (req, res) => {
   }
 };
 
-
+// Delete Student
 export const deleteStudent = async (req, res) => {
   try {
-    const delstudent = req.body;
-    const student = await Student.findOneAndDelete({ delstudent });
+    const { studentId } = req.body;
+
+    const student = await Student.findOneAndDelete({ studentId });
 
     if (!student) {
       return res.status(404).json({
