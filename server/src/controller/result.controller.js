@@ -11,17 +11,17 @@ export const addResult = async (req, res) => {
     subjects.forEach((sub) => {
       total += sub.marks;
 
-      if (sub.marks >= 90) { 
-        sub.grade = "A+" 
+      if (sub.marks >= 90) {
+        sub.grade = "A+"
       }
-      else if (sub.marks >= 75){
+      else if (sub.marks >= 75) {
         sub.grade = "A"
       }
       else if (sub.marks >= 60) {
         sub.grade = "B"
       }
       else if (sub.marks >= 40) {
-        sub.grade = "C" 
+        sub.grade = "C"
       }
       else {
         sub.grade = "F"
@@ -73,7 +73,7 @@ export const getAllResults = async (req, res) => {
 export const getResultById = async (req, res) => {
   try {
     const student = req.body;
-    const result = await Result.findOne({student});
+    const result = await Result.findOne({ student });
 
     if (!result) {
       return res.status(404).json({
@@ -97,7 +97,7 @@ export const getResultById = async (req, res) => {
 export const updateResult = async (req, res) => {
   try {
     const student = req.body;
-    const result = await Result.findOneAndUpdate({student}, req.body, { new: true });
+    const result = await Result.findOneAndUpdate({ student }, req.body, { new: true });
 
     if (!result) {
       return res.status(404).json({
@@ -122,7 +122,7 @@ export const updateResult = async (req, res) => {
 export const deleteResult = async (req, res) => {
   try {
     const student = req.body;
-    const result = await Result.findOneAndDelete({student});
+    const result = await Result.findOneAndDelete({ student });
 
     if (!result) {
       return res.status(404).json({
