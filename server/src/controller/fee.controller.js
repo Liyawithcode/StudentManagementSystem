@@ -1,29 +1,38 @@
-import Fee from "../model/fee.model.js";
+import { Fee } from "../model/fee.model.js";
 
+// Create Fee Record
 export const createFee = async (req, res) => {
   try {
-    const { student, feeType, amount, paidAmount, paymentMethod } = req.body;
+    const { studentId, courseId, feeAmount, feeType, dueDate, paymentMethod, feeStatus } = req.body;
 
-    const remainingAmount = amount - (paidAmount || 0);
+    if (!studentId || !courseId || feeAmount === undefined || !feeType || !dueDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all required fields: studentId, courseId, feeAmount, feeType, dueDate",
+      });
+    }
 
-    let status = "PENDING";
-    if (paidAmount >= amount) status = "PAID";
-    else if (paidAmount > 0) status = "PARTIAL";
+    const validFeeTypes = ["Admission", "Examination", "Hostel", "Library", "Other"];
+    if (!validFeeTypes.includes(feeType)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid feeType. Must be one of: ${validFeeTypes.join(", ")}`,
+      });
+    }
 
     const fee = await Fee.create({
-      student,
+      studentId,
+      courseId,
+      feeAmount,
       feeType,
-      amount,
-      paidAmount: paidAmount || 0,
-      remainingAmount,
-      status,
-      paymentMethod,
-      paymentDate: paidAmount > 0 ? new Date() : null,
+      feeStatus: feeStatus || "pending",
+      dueDate,
+      paymentMethod: paymentMethod || "CASH",
     });
 
     res.status(201).json({
       success: true,
-      message: "Fee created successfully",
+      message: "Fee record created successfully",
       fee,
     });
   } catch (error) {
@@ -34,10 +43,10 @@ export const createFee = async (req, res) => {
   }
 };
 
+// Get All Fee Records
 export const getAllFees = async (req, res) => {
   try {
-    const student = req.body;
-    const fees = await Fee.find({ student });
+    const fees = await Fee.find();
 
     res.status(200).json({
       success: true,
@@ -52,14 +61,23 @@ export const getAllFees = async (req, res) => {
   }
 };
 
-
+// Get Fee Records by Student ID
 export const getFeesByStudent = async (req, res) => {
   try {
-    const student = req.body;
-    const fees = await Fee.find({ student });
+    const studentId = req.params.studentId || req.query.studentId;
+
+    if (!studentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide student ID",
+      });
+    }
+
+    const fees = await Fee.find({ studentId });
 
     res.status(200).json({
       success: true,
+      count: fees.length,
       fees,
     });
   } catch (error) {
@@ -70,32 +88,34 @@ export const getFeesByStudent = async (req, res) => {
   }
 };
 
+// Update Payment Status
 export const updatePayment = async (req, res) => {
   try {
-    const { paidAmount } = req.body;
+    const { id } = req.params;
+    const { feeStatus, paymentMethod } = req.body;
 
-    const student = req.body;
-    const fee = await Fee.findOne({ student });
+    if (!feeStatus || !["Paid", "pending", "Partial"].includes(feeStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid feeStatus ('Paid', 'pending', 'Partial')",
+      });
+    }
+
+    const updateData = { feeStatus };
+    if (paymentMethod) updateData.paymentMethod = paymentMethod;
+
+    const fee = await Fee.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
 
     if (!fee) {
       return res.status(404).json({
         success: false,
-        message: "Fee not found",
+        message: "Fee record not found",
       });
     }
-
-    fee.paidAmount += paidAmount;
-    fee.remainingAmount = fee.amount - fee.paidAmount;
-
-    if (fee.paidAmount >= fee.amount) {
-      fee.status = "PAID";
-    } else if (fee.paidAmount > 0) {
-      fee.status = "PARTIAL";
-    }
-
-    fee.paymentDate = new Date();
-
-    await fee.save();
 
     res.status(200).json({
       success: true,
@@ -110,22 +130,23 @@ export const updatePayment = async (req, res) => {
   }
 };
 
-
+// Delete Fee Record
 export const deleteFee = async (req, res) => {
   try {
-    const student = req.body;
-    const fee = await Fee.findOneAndDelete({ student });
+    const { id } = req.params;
+
+    const fee = await Fee.findByIdAndDelete(id);
 
     if (!fee) {
       return res.status(404).json({
         success: false,
-        message: "Fee not found",
+        message: "Fee record not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "Fee deleted successfully",
+      message: "Fee record deleted successfully",
     });
   } catch (error) {
     res.status(500).json({

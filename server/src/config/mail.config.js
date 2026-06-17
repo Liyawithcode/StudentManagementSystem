@@ -13,7 +13,7 @@ export const MailTransporter = nodemailer.createTransport({
 
 export const verifyMailConnection = async () => {
     try{
-        await transporter.verify();
+        await MailTransporter.verify();
         console.log("Mail server is ready to take messages");
     }catch(error){
         console.log("Mail server connection failed:", error.message);    

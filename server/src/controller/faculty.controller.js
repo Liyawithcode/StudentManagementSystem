@@ -1,0 +1,285 @@
+import { Faculty } from "../model/faculty.model.js";
+import bcrypt from "bcryptjs";
+import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import { generateOTP } from "./auth.controller.js";
+import { sendVerificationOtp } from "../utils/sendEmail.js";
+
+// Register Faculty
+export const registerFaculty = async (req, res) => {
+  try {
+    const { email, password, facultyId, firstName, lastName, department, qualification, salary, ...facultyData } = req.body;
+
+    if (!email || !password || !firstName || !lastName || !department || !qualification || salary === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all required fields: email, password, firstName, lastName, department, qualification, salary",
+      });
+    }
+
+    const existingFaculty = await Faculty.findOne({ email });
+    if (existingFaculty) {
+      return res.status(400).json({
+        success: false,
+        message: "Faculty member already exists with this email",
+      });
+    }
+
+    // Generate custom facultyId if not provided
+    const finalFacultyId = facultyId || `FAC${Math.floor(10000 + Math.random() * 90000)}`;
+    const existingFacultyId = await Faculty.findOne({ facultyId: finalFacultyId });
+    if (existingFacultyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Generated Faculty ID already exists, please try again",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = generateOTP();
+    const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    const faculty = await Faculty.create({
+      ...facultyData,
+      facultyId: finalFacultyId,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      department,
+      qualification,
+      salary,
+      verifyOtp: otp,
+      verifyOtpExpire: otpExpire,
+      isVerified: false,
+    });
+
+    // Send email verification OTP
+    await sendVerificationOtp(email, otp);
+
+    const accessToken = generateAccessToken(faculty);
+    const refreshToken = generateRefreshToken(faculty);
+
+    res.cookie("refreshToken", refreshToken, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    const facultyResponse = faculty.toObject();
+    delete facultyResponse.password;
+    delete facultyResponse.verifyOtp;
+    delete facultyResponse.verifyOtpExpire;
+
+    res.status(201).json({
+      success: true,
+      message: "Faculty registered successfully. Verification OTP sent to email.",
+      faculty: facultyResponse,
+      accessToken,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Login Faculty
+export const loginFaculty = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide email and password",
+      });
+    }
+
+    const faculty = await Faculty.findOne({ email }).select("+password");
+
+    if (!faculty) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, faculty.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    const accessToken = generateAccessToken(faculty);
+    const refreshToken = generateRefreshToken(faculty);
+
+    res.cookie("refreshToken", refreshToken, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    const facultyResponse = faculty.toObject();
+    delete facultyResponse.password;
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      faculty: facultyResponse,
+      accessToken,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get All Faculty members
+export const getAllFaculties = async (req, res) => {
+  try {
+    const faculties = await Faculty.find();
+
+    res.status(200).json({
+      success: true,
+      faculties,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get Faculty details by facultyId
+export const getFacultyById = async (req, res) => {
+  try {
+    const facultyId = req.params.facultyId || req.body.facultyId || req.query.facultyId;
+
+    if (!facultyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide faculty ID",
+      });
+    }
+
+    const faculty = await Faculty.findOne({ facultyId });
+
+    if (!faculty) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      faculty,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get Current Faculty Profile
+export const getProfile = async (req, res) => {
+  try {
+    const facultyObj = req.user.toObject();
+    delete facultyObj.password;
+
+    res.status(200).json({
+      success: true,
+      faculty: facultyObj,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Update Faculty member
+export const updateFaculty = async (req, res) => {
+  try {
+    // If updating own profile, use req.user.facultyId
+    const facultyId = req.params.facultyId || req.body.facultyId || (req.user && req.user.role === 'faculty' ? req.user.facultyId : null);
+
+    if (!facultyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide faculty ID",
+      });
+    }
+
+    const { email, password, role, isVerified, ...updateData } = req.body;
+
+    const faculty = await Faculty.findOneAndUpdate(
+      { facultyId },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!faculty) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Faculty profile updated successfully",
+      faculty,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Delete Faculty member
+export const deleteFaculty = async (req, res) => {
+  try {
+    const facultyId = req.params.facultyId || req.body.facultyId;
+
+    if (!facultyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide faculty ID",
+      });
+    }
+
+    const faculty = await Faculty.findOneAndDelete({ facultyId });
+
+    if (!faculty) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Faculty member deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
