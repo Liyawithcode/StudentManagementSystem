@@ -1,4 +1,4 @@
-import { Student } from "../model/student.model.js";
+import * as studentService from "../services/studentService.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { generateOTP } from "./auth.controller.js";
@@ -16,7 +16,7 @@ export const registerStudent = async (req, res) => {
       });
     }
 
-    const existingStudent = await Student.findOne({ email });
+    const existingStudent = await studentService.findStudentByEmail(email);
 
     if (existingStudent) {
       return res.status(400).json({
@@ -27,7 +27,7 @@ export const registerStudent = async (req, res) => {
 
     // Generate custom studentId if not provided
     const finalStudentId = studentId || `STU${Math.floor(10000 + Math.random() * 90000)}`;
-    const existingStudentId = await Student.findOne({ studentId: finalStudentId });
+    const existingStudentId = await studentService.findStudentById(finalStudentId);
     if (existingStudentId) {
       return res.status(400).json({
         success: false,
@@ -39,7 +39,7 @@ export const registerStudent = async (req, res) => {
     const otp = generateOTP();
     const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    const student = await Student.create({
+    const student = await studentService.createStudent({
       ...studentData,
       studentId: finalStudentId,
       email,
@@ -93,7 +93,7 @@ export const loginStudent = async (req, res) => {
       });
     }
 
-    const student = await Student.findOne({ email }).select("+password");
+    const student = await studentService.findStudentByEmail(email, "+password");
 
     if (!student) {
       return res.status(400).json({
@@ -141,7 +141,7 @@ export const loginStudent = async (req, res) => {
 // Get All Students
 export const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find();
+    const students = await studentService.findAllStudents();
 
     res.status(200).json({
       success: true,
@@ -167,7 +167,7 @@ export const getStudent = async (req, res) => {
       });
     }
 
-    const student = await Student.findOne({ studentId });
+    const student = await studentService.findStudentById(studentId);
 
     if (!student) {
       return res.status(404).json({
@@ -202,11 +202,7 @@ export const updateStudent = async (req, res) => {
 
     const { email, password, role, isVerified, ...updateData } = req.body;
 
-    const student = await Student.findOneAndUpdate(
-      { studentId },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    const student = await studentService.updateStudent(studentId, updateData);
 
     if (!student) {
       return res.status(404).json({
@@ -240,7 +236,7 @@ export const deleteStudent = async (req, res) => {
       });
     }
 
-    const student = await Student.findOneAndDelete({ studentId });
+    const student = await studentService.deleteStudent(studentId);
 
     if (!student) {
       return res.status(404).json({

@@ -1,4 +1,4 @@
-import { Faculty } from "../model/faculty.model.js";
+import * as teacherService from "../services/teacherService.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { generateOTP } from "./auth.controller.js";
@@ -16,7 +16,7 @@ export const registerFaculty = async (req, res) => {
       });
     }
 
-    const existingFaculty = await Faculty.findOne({ email });
+    const existingFaculty = await teacherService.findFacultyByEmail(email);
     if (existingFaculty) {
       return res.status(400).json({
         success: false,
@@ -26,7 +26,7 @@ export const registerFaculty = async (req, res) => {
 
     // Generate custom facultyId if not provided
     const finalFacultyId = facultyId || `FAC${Math.floor(10000 + Math.random() * 90000)}`;
-    const existingFacultyId = await Faculty.findOne({ facultyId: finalFacultyId });
+    const existingFacultyId = await teacherService.findFacultyById(finalFacultyId);
     if (existingFacultyId) {
       return res.status(400).json({
         success: false,
@@ -38,7 +38,7 @@ export const registerFaculty = async (req, res) => {
     const otp = generateOTP();
     const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    const faculty = await Faculty.create({
+    const faculty = await teacherService.createFaculty({
       ...facultyData,
       facultyId: finalFacultyId,
       firstName,
@@ -97,7 +97,7 @@ export const loginFaculty = async (req, res) => {
       });
     }
 
-    const faculty = await Faculty.findOne({ email }).select("+password");
+    const faculty = await teacherService.findFacultyByEmail(email, "+password");
 
     if (!faculty) {
       return res.status(400).json({
@@ -145,7 +145,7 @@ export const loginFaculty = async (req, res) => {
 // Get All Faculty members
 export const getAllFaculties = async (req, res) => {
   try {
-    const faculties = await Faculty.find();
+    const faculties = await teacherService.findAllFaculties();
 
     res.status(200).json({
       success: true,
@@ -171,7 +171,7 @@ export const getFacultyById = async (req, res) => {
       });
     }
 
-    const faculty = await Faculty.findOne({ facultyId });
+    const faculty = await teacherService.findFacultyById(facultyId);
 
     if (!faculty) {
       return res.status(404).json({
@@ -225,11 +225,7 @@ export const updateFaculty = async (req, res) => {
 
     const { email, password, role, isVerified, ...updateData } = req.body;
 
-    const faculty = await Faculty.findOneAndUpdate(
-      { facultyId },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    const faculty = await teacherService.updateFaculty(facultyId, updateData);
 
     if (!faculty) {
       return res.status(404).json({
@@ -263,7 +259,7 @@ export const deleteFaculty = async (req, res) => {
       });
     }
 
-    const faculty = await Faculty.findOneAndDelete({ facultyId });
+    const faculty = await teacherService.deleteFaculty(facultyId);
 
     if (!faculty) {
       return res.status(404).json({

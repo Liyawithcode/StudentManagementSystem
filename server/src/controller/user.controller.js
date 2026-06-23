@@ -1,4 +1,4 @@
-import { User } from "../model/user.model.js";
+import * as userService from "../services/userService.js";
 import bcrypt from "bcryptjs";
 
 export const createUser = async (req, res) => {
@@ -8,13 +8,13 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Username, email and password are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await userService.findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
+    const user = await userService.createUser({
       username,
       email,
       password: hashedPassword,
@@ -32,7 +32,7 @@ export const createUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await userService.findAllUsers();
     res.status(200).json({ success: true, count: users.length, users });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -41,7 +41,7 @@ export const getUsers = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await userService.findUserById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -58,7 +58,7 @@ export const updateUser = async (req, res) => {
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    const user = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
+    const user = await userService.updateUser(req.params.id, updateData);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -70,7 +70,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await userService.deleteUser(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
