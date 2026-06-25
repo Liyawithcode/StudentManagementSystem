@@ -1,33 +1,22 @@
 import { Faculty } from "../model/faculty.model.js";
+import { BaseService } from "./baseService.js";
 
-export const findFacultyByEmail = async (email, selectFields = "") => {
-  let query = Faculty.findOne({ email });
-  if (selectFields) {
-    query = query.select(selectFields);
-  }
-  return await query;
-};
+const facultyDb = new BaseService(Faculty);
 
-export const findFacultyById = async (facultyId) => {
-  return await Faculty.findOne({ facultyId });
-};
+export const findFacultyByEmail = (email, selectFields = "") =>
+  facultyDb.findOne({ email }, selectFields);
 
-export const createFaculty = async (facultyData) => {
-  return await Faculty.create(facultyData);
-};
+export const findFacultyById = (facultyId) =>
+  facultyDb.findOne({ facultyId });
 
-export const findAllFaculties = async () => {
-  return await Faculty.find();
-};
+export const createFaculty = (facultyData) =>
+  facultyDb.create(facultyData);
 
-export const updateFaculty = async (facultyId, updateData) => {
-  return await Faculty.findOneAndUpdate(
-    { facultyId },
-    { $set: updateData },
-    { new: true, runValidators: true }
-  );
-};
+export const findAllFaculties = () =>
+  facultyDb.find();
 
-export const deleteFaculty = async (facultyId) => {
-  return await Faculty.findOneAndDelete({ facultyId });
-};
+export const updateFaculty = (facultyId, updateData) =>
+  facultyDb.findOneAndUpdate({ facultyId }, updateData, { new: true, runValidators: true });
+
+export const deleteFaculty = (facultyId) =>
+  facultyDb.findOneAndDelete({ facultyId });

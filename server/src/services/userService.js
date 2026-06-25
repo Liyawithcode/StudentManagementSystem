@@ -1,25 +1,11 @@
 import { User } from "../model/user.model.js";
+import { BaseService } from "./baseService.js";
 
-export const findUserByEmail = async (email) => {
-  return await User.findOne({ email });
-};
+const userDb = new BaseService(User);
 
-export const findUserById = async (id) => {
-  return await User.findById(id);
-};
-
-export const createUser = async (userData) => {
-  return await User.create(userData);
-};
-
-export const findAllUsers = async () => {
-  return await User.find();
-};
-
-export const updateUser = async (id, updateData) => {
-  return await User.findByIdAndUpdate(id, { $set: updateData }, { new: true });
-};
-
-export const deleteUser = async (id) => {
-  return await User.findByIdAndDelete(id);
-};
+export const findUserByEmail = (email) => userDb.findOne({ email });
+export const findUserById = (id) => userDb.findById(id);
+export const createUser = (userData) => userDb.create(userData);
+export const findAllUsers = () => userDb.find();
+export const updateUser = (id, updateData) => userDb.findByIdAndUpdate(id, updateData);
+export const deleteUser = (id) => userDb.findByIdAndDelete(id);

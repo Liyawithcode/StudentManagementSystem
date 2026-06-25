@@ -5,16 +5,6 @@ import { Faculty } from "../model/faculty.model.js";
 import { Admin } from "../model/admin.model.js";
 import { User } from "../model/user.model.js";
 
-export const errorMiddleware = (err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-
-    return res.status(statusCode).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-        stack: config_ENV.NODE_ENV === "development" ? err.stack : undefined,
-    });
-};
-
 /**
  * Middleware to protect routes via JWT verification
  */
@@ -70,19 +60,4 @@ export const protect = async (req, res, next) => {
             error: error.message
         });
     }
-};
-
-/**
- * Middleware to restrict access to specific roles
- */
-export const restrictTo = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({
-                success: false,
-                message: `User role '${req.user ? req.user.role : "undefined"}' is not authorized to access this route.`
-            });
-        }
-        next();
-    };
 };

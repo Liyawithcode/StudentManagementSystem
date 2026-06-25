@@ -1,33 +1,22 @@
 import { Student } from "../model/student.model.js";
+import { BaseService } from "./baseService.js";
 
-export const findStudentByEmail = async (email, selectFields = "") => {
-  let query = Student.findOne({ email });
-  if (selectFields) {
-    query = query.select(selectFields);
-  }
-  return await query;
-};
+const studentDb = new BaseService(Student);
 
-export const findStudentById = async (studentId) => {
-  return await Student.findOne({ studentId });
-};
+export const findStudentByEmail = (email, selectFields = "") =>
+  studentDb.findOne({ email }, selectFields);
 
-export const createStudent = async (studentData) => {
-  return await Student.create(studentData);
-};
+export const findStudentById = (studentId) =>
+  studentDb.findOne({ studentId });
 
-export const findAllStudents = async () => {
-  return await Student.find();
-};
+export const createStudent = (studentData) =>
+  studentDb.create(studentData);
 
-export const updateStudent = async (studentId, updateData) => {
-  return await Student.findOneAndUpdate(
-    { studentId },
-    { $set: updateData },
-    { new: true, runValidators: true }
-  );
-};
+export const findAllStudents = () =>
+  studentDb.find();
 
-export const deleteStudent = async (studentId) => {
-  return await Student.findOneAndDelete({ studentId });
-};
+export const updateStudent = (studentId, updateData) =>
+  studentDb.findOneAndUpdate({ studentId }, updateData, { new: true, runValidators: true });
+
+export const deleteStudent = (studentId) =>
+  studentDb.findOneAndDelete({ studentId });

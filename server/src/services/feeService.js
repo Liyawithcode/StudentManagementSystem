@@ -1,29 +1,12 @@
 import { Fee } from "../model/fee.model.js";
+import { BaseService } from "./baseService.js";
 
-export const createFeeRecord = async (feeData) => {
-  return await Fee.create(feeData);
-};
+const feeDb = new BaseService(Fee);
 
-export const getFeeRecordById = async (id) => {
-  return await Fee.findById(id);
-};
-
-export const findAllFeeRecords = async () => {
-  return await Fee.find();
-};
-
-export const findFeesByStudentId = async (studentId) => {
-  return await Fee.find({ studentId });
-};
-
-export const updateFeeRecord = async (id, updateData) => {
-  return await Fee.findByIdAndUpdate(
-    id,
-    { $set: updateData },
-    { new: true, runValidators: true }
-  );
-};
-
-export const deleteFeeRecord = async (id) => {
-  return await Fee.findByIdAndDelete(id);
-};
+export const createFeeRecord = (feeData) => feeDb.create(feeData);
+export const getFeeRecordById = (id) => feeDb.findById(id);
+export const findAllFeeRecords = () => feeDb.find();
+export const findFeesByStudentId = (studentId) => feeDb.find({ studentId });
+export const updateFeeRecord = (id, updateData) =>
+  feeDb.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+export const deleteFeeRecord = (id) => feeDb.findByIdAndDelete(id);

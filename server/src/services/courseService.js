@@ -1,25 +1,11 @@
 import { Course } from "../model/course.model.js";
+import { BaseService } from "./baseService.js";
 
-export const findCourseByCode = async (courseCode) => {
-  return await Course.findOne({ courseCode });
-};
+const courseDb = new BaseService(Course);
 
-export const createCourse = async (courseData) => {
-  return await Course.create(courseData);
-};
-
-export const findAllCourses = async () => {
-  return await Course.find();
-};
-
-export const updateCourse = async (courseCode, updateData) => {
-  return await Course.findOneAndUpdate(
-    { courseCode },
-    { $set: updateData },
-    { new: true, runValidators: true }
-  );
-};
-
-export const deleteCourse = async (courseCode) => {
-  return await Course.findOneAndDelete({ courseCode });
-};
+export const findCourseByCode = (courseCode) => courseDb.findOne({ courseCode });
+export const createCourse = (courseData) => courseDb.create(courseData);
+export const findAllCourses = () => courseDb.find();
+export const updateCourse = (courseCode, updateData) =>
+  courseDb.findOneAndUpdate({ courseCode }, updateData, { new: true, runValidators: true });
+export const deleteCourse = (courseCode) => courseDb.findOneAndDelete({ courseCode });

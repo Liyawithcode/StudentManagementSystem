@@ -1,13 +1,8 @@
 import { Exam } from "../model/exam.model.js";
+import { BaseService } from "./baseService.js";
 
-export const scheduleExam = async (examData) => {
-  return await Exam.create(examData);
-};
+const examDb = new BaseService(Exam);
 
-export const getExamSchedules = async () => {
-  return await Exam.find();
-};
-
-export const deleteExamSchedule = async (id) => {
-  return await Exam.findByIdAndDelete(id);
-};
+export const scheduleExam = (examData) => examDb.create(examData);
+export const getExamSchedules = () => examDb.find();
+export const deleteExamSchedule = (id) => examDb.findByIdAndDelete(id);
