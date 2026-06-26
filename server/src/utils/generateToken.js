@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { config_ENV } from "../config/auth.config.js";
+import { generateRefreshToken } from "./generateRefreshToken.js";
 
 export const generateAccessToken = (user) => {
     return jwt.sign(
@@ -15,16 +16,6 @@ export const generateAccessToken = (user) => {
     );
 };
 
-export const generateRefreshToken = (user) => {
-    return jwt.sign(
-        {
-            id: user._id,
-            email: user.email,
-            role: user.role
-        },
-        config_ENV.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn: config_ENV.REFRESH_TOKEN_EXPIRE_TIME || "7d"
-        }
-    );
-};
+export const generateToken = generateAccessToken;
+
+export { generateRefreshToken };
