@@ -1,5 +1,6 @@
 
 import dotenv from "dotenv"
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -29,5 +30,33 @@ if(!config_ENV.EMAIL_HOST || !config_ENV.EMAIL_USER || !config_ENV.EMAIL_PASS ||
     console.error("Missing required email environment variables. Please check your .env file.");
     process.exit(1);
 }
+
+export const generateAccessToken = (user) => {
+    return jwt.sign(
+        {
+            id: user._id,
+            email: user.email,
+            role: user.role
+        },
+        config_ENV.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: config_ENV.ACCESS_TOKEN_EXPIRE_TIME || "15m"
+        }
+    );
+};
+
+export const generateRefreshToken = (user) => {
+    return jwt.sign(
+        {
+            id: user._id,
+            email: user.email,
+            role: user.role
+        },
+        config_ENV.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: config_ENV.REFRESH_TOKEN_EXPIRE_TIME || "7d"
+        }
+    );
+};
 
 

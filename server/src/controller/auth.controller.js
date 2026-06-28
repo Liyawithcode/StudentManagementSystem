@@ -4,9 +4,8 @@ import { Admin } from "../model/admin.model.js";
 import { Faculty } from "../model/faculty.model.js";
 import { Student } from "../model/student.model.js";
 import { User } from "../model/user.model.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import { config_ENV, generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
 import { sendVerificationOtp } from "../utils/sendEmail.js";
-import { config_ENV } from "../config/auth.config.js";
 
 // Helper to generate 6-digit numeric OTP
 export const generateOTP = () => {

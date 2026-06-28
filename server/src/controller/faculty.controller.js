@@ -1,6 +1,6 @@
 import * as teacherService from "../services/teacherService.js";
 import bcrypt from "bcryptjs";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
 import { generateOTP } from "./auth.controller.js";
 import { sendVerificationOtp } from "../utils/sendEmail.js";
 

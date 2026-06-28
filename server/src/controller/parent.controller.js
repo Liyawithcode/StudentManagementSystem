@@ -2,7 +2,7 @@ import { Parent } from "../model/parent.model.js";
 import { Student } from "../model/student.model.js";
 import { Attendance } from "../model/attendance.model.js";
 import { Result } from "../model/result.model.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
 import bcrypt from "bcryptjs";
 
 export const registerParent = async (req, res) => {
