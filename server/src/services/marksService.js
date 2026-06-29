@@ -1,4 +1,5 @@
 import { Result } from "../model/result.model.js";
+import { calculateResultStats } from "../utils/index.js";
 
 /**
  * Record and aggregate marks for a specific student, course, and subject.
@@ -7,22 +8,14 @@ export const recordMarks = async (studentId, courseName, subjectName, marks) => 
   let result = await Result.findOne({ studentId, courseName });
 
   if (!result) {
-    const percentage = marks;
-    let grade = "F";
-    if (percentage >= 90) grade = "A+";
-    else if (percentage >= 75) grade = "A";
-    else if (percentage >= 60) grade = "B";
-    else if (percentage >= 40) grade = "C";
+    const subjects = [{ subjectName, marks }];
+    const stats = calculateResultStats(subjects);
 
     result = new Result({
       studentId,
       courseName,
-      subjects: [{ subjectName, marks }],
-      totalMarks: 100,
-      obtainedMarks: marks,
-      percentage,
-      grade,
-      resultStatus: percentage >= 40 ? "Pass" : "Fail"
+      subjects,
+      ...stats
     });
   } else {
     const subIndex = result.subjects.findIndex(s => s.subjectName === subjectName);
@@ -32,23 +25,13 @@ export const recordMarks = async (studentId, courseName, subjectName, marks) => 
       result.subjects.push({ subjectName, marks });
     }
 
-    let obtained = 0;
-    result.subjects.forEach(s => obtained += s.marks);
-    const total = result.subjects.length * 100;
-    const percentage = (obtained / total) * 100;
+    const stats = calculateResultStats(result.subjects);
 
-    result.obtainedMarks = obtained;
-    result.totalMarks = total;
-    result.percentage = percentage;
-    
-    let grade = "F";
-    if (percentage >= 90) grade = "A+";
-    else if (percentage >= 75) grade = "A";
-    else if (percentage >= 60) grade = "B";
-    else if (percentage >= 40) grade = "C";
-    
-    result.grade = grade;
-    result.resultStatus = percentage >= 40 ? "Pass" : "Fail";
+    result.obtainedMarks = stats.obtainedMarks;
+    result.totalMarks = stats.totalMarks;
+    result.percentage = stats.percentage;
+    result.grade = stats.grade;
+    result.resultStatus = stats.resultStatus;
   }
 
   return await result.save();

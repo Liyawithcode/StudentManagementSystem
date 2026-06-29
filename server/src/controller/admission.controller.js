@@ -1,6 +1,5 @@
 import { Student } from "../model/student.model.js";
-import { generateOTP } from "./auth.controller.js";
-import { sendVerificationOtp } from "../utils/sendEmail.js";
+import { generateOTP, sendVerificationOtp, generateStudentId } from "../utils/index.js";
 import bcrypt from "bcryptjs";
 
 export const registerCandidate = async (req, res) => {
@@ -15,7 +14,7 @@ export const registerCandidate = async (req, res) => {
       return res.status(400).json({ success: false, message: "Candidate already registered with this email" });
     }
 
-    const finalStudentId = `STU${Math.floor(10000 + Math.random() * 90000)}`;
+    const finalStudentId = generateStudentId();
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOTP();
 

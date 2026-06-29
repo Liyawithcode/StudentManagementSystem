@@ -4,8 +4,7 @@ import { Student } from "../model/student.model.js";
 import { Faculty } from "../model/faculty.model.js";
 import { Course } from "../model/course.model.js";
 import { Fee } from "../model/fee.model.js";
-import { generateOTP } from "./auth.controller.js";
-import { sendVerificationOtp } from "../utils/sendEmail.js";
+import { generateOTP, sendVerificationOtp, generateAdminId } from "../utils/index.js";
 
 /**
  * Register Admin
@@ -29,7 +28,7 @@ export const registerAdmin = async (req, res) => {
             });
         }
 
-        const finalAdminId = adminid || `ADM${Math.floor(10000 + Math.random() * 90000)}`;
+        const finalAdminId = adminid || generateAdminId();
         const existingAdminId = await Admin.findOne({ adminid: finalAdminId });
         if (existingAdminId) {
             return res.status(400).json({

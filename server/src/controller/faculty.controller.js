@@ -1,8 +1,7 @@
 import * as teacherService from "../services/teacherService.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
-import { generateOTP } from "./auth.controller.js";
-import { sendVerificationOtp } from "../utils/sendEmail.js";
+import { generateOTP, sendVerificationOtp, generateFacultyId } from "../utils/index.js";
 
 // Register Faculty
 export const registerFaculty = async (req, res) => {
@@ -25,7 +24,7 @@ export const registerFaculty = async (req, res) => {
     }
 
     // Generate custom facultyId if not provided
-    const finalFacultyId = facultyId || `FAC${Math.floor(10000 + Math.random() * 90000)}`;
+    const finalFacultyId = facultyId || generateFacultyId();
     const existingFacultyId = await teacherService.findFacultyById(finalFacultyId);
     if (existingFacultyId) {
       return res.status(400).json({

@@ -1,3 +1,5 @@
+import { generateCertificateId } from "../utils/index.js";
+
 export const generateCertificate = async (req, res) => {
   try {
     const { studentId, certificateType } = req.body; // e.g. "Transfer Certificate", "Bonafide", "Character Certificate"
@@ -7,7 +9,7 @@ export const generateCertificate = async (req, res) => {
 
     // Generate formatted stub certificate details
     const certificate = {
-      certificateId: `CERT-${Math.floor(100000 + Math.random() * 900000)}`,
+      certificateId: generateCertificateId(),
       studentId,
       type: certificateType,
       issueDate: new Date().toISOString().split("T")[0],

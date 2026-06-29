@@ -5,12 +5,8 @@ import { Faculty } from "../model/faculty.model.js";
 import { Student } from "../model/student.model.js";
 import { User } from "../model/user.model.js";
 import { config_ENV, generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
-import { sendVerificationOtp } from "../utils/sendEmail.js";
+import { sendVerificationOtp, generateOTP } from "../utils/index.js";
 
-// Helper to generate 6-digit numeric OTP
-export const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-};
 
 // Helper to find user by email across all relevant schemas
 const findUserByEmail = async (email) => {

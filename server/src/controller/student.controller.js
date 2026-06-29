@@ -1,8 +1,7 @@
 import * as studentService from "../services/studentService.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
-import { generateOTP } from "./auth.controller.js";
-import { sendVerificationOtp } from "../utils/sendEmail.js";
+import { generateOTP, sendVerificationOtp, generateStudentId } from "../utils/index.js";
 
 // Register Student
 export const registerStudent = async (req, res) => {
@@ -26,7 +25,7 @@ export const registerStudent = async (req, res) => {
     }
 
     // Generate custom studentId if not provided
-    const finalStudentId = studentId || `STU${Math.floor(10000 + Math.random() * 90000)}`;
+    const finalStudentId = studentId || generateStudentId();
     const existingStudentId = await studentService.findStudentById(finalStudentId);
     if (existingStudentId) {
       return res.status(400).json({

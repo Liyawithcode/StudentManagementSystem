@@ -2,13 +2,9 @@ import { Admin } from "../model/admin.model.js";
 import { Faculty } from "../model/faculty.model.js";
 import { Student } from "../model/student.model.js";
 import { User } from "../model/user.model.js";
+import { generateOTP } from "../utils/index.js";
 
-/**
- * Generate a 6-digit numeric OTP.
- */
-export const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+export { generateOTP };
 
 /**
  * Look up a user by email across Admin, Faculty, Student, and User schemas.
