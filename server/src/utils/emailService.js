@@ -1,15 +1,6 @@
 import { MailTransporter } from "../config/mail.config.js";
 import { config_ENV } from "../config/auth.config.js";
 
-/**
- * General helper to send an email using the configured MailTransporter
- * @param {Object} options
- * @param {string} options.to - Recipient email
- * @param {string} options.subject - Email subject
- * @param {string} options.text - Plain text body
- * @param {string} [options.html] - HTML body
- * @returns {Promise<any>}
- */
 export const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const mailOptions = {

@@ -1,9 +1,6 @@
 import { MailTransporter } from "../config/mail.config.js";
 import { config_ENV } from "../config/auth.config.js";
 
-/**
- * General helper to send an email using the configured MailTransporter
- */
 export const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const mailOptions = {

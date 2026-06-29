@@ -1,8 +1,3 @@
-/**
- * Generate a numeric OTP of a specific length (default is 6)
- * @param {number} [length=6] - The length of the numeric OTP
- * @returns {string} - The generated OTP as a string
- */
 export const generateOTP = (length = 6) => {
     if (length === 6) {
         return Math.floor(100000 + Math.random() * 900000).toString();
