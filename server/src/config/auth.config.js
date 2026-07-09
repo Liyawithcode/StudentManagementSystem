@@ -18,7 +18,7 @@ export const config_ENV = {
     EMAIL_PORT: parseInt(process.env.EMAIL_PORT) || 587,
     EMAIL_USER: process.env.EMAIL_USER,
     EMAIL_PASS: process.env.EMAIL_PASS,
-    EMAIL_SECURE: process.env.EMAIL_SECURE || false
+    EMAIL_SECURE: process.env.EMAIL_SECURE === "TRUE" || process.env.EMAIL_SECURE === "true"
 };
 
 if (!config_ENV.PORT || !config_ENV.MONGO_URL) {

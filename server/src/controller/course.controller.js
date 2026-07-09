@@ -94,12 +94,12 @@ export const getCourseByCode = async (req, res) => {
 // Update Course
 export const updateCourse = async (req, res) => {
   try {
-    const courseCode = req.params.courseCode || req.body.courseCode;
+    const courseCode = req.params.id || req.params.courseCode || req.body.courseCode;
 
     if (!courseCode) {
       return res.status(400).json({
         success: false,
-        message: "Please provide course code",
+        message: "Please provide course ID or code",
       });
     }
 
@@ -130,12 +130,12 @@ export const updateCourse = async (req, res) => {
 // Delete Course
 export const deleteCourse = async (req, res) => {
   try {
-    const courseCode = req.params.courseCode || req.body.courseCode;
+    const courseCode = req.params.id || req.params.courseCode || req.body.courseCode;
 
     if (!courseCode) {
       return res.status(400).json({
         success: false,
-        message: "Please provide course code",
+        message: "Please provide course ID or code",
       });
     }
 

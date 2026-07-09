@@ -64,7 +64,12 @@ export const getAllFees = async (req, res) => {
 // Get Fee Records by Student ID
 export const getFeesByStudent = async (req, res) => {
   try {
-    const studentId = req.params.studentId || req.query.studentId;
+    let studentId = req.params.studentId || req.query.studentId;
+
+    // Allow 'me' as a shortcut for the logged-in user's own ID
+    if (studentId === 'me' && req.user) {
+      studentId = req.user._id.toString();
+    }
 
     if (!studentId) {
       return res.status(400).json({
@@ -73,7 +78,10 @@ export const getFeesByStudent = async (req, res) => {
       });
     }
 
-    const fees = await Fee.find({ studentId });
+    // Search by the studentId field value — could be MongoDB ObjectId or custom ID
+    const fees = await Fee.find({
+      studentId: studentId,
+    }).sort({ dueDate: -1 });
 
     res.status(200).json({
       success: true,
@@ -91,8 +99,15 @@ export const getFeesByStudent = async (req, res) => {
 // Update Payment Status
 export const updatePayment = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id || req.body.feeId;
     const { feeStatus, paymentMethod } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Fee ID is required",
+      });
+    }
 
     if (!feeStatus || !["Paid", "pending", "Partial"].includes(feeStatus)) {
       return res.status(400).json({

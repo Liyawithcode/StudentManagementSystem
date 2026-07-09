@@ -9,25 +9,25 @@ const examSchema = new mongoose.Schema(
     },
     courseCode: {
       type: String,
-      required: [true, "Course code is required"],
       trim: true,
+      default: "",
     },
-    date: {
+    examDate: {
       type: Date,
       required: [true, "Exam date is required"],
     },
     time: {
-      type: String, // format "HH:MM"
-      required: [true, "Exam time is required"],
-    },
-    roomNumber: {
       type: String,
-      required: [true, "Room number is required"],
       trim: true,
+      default: "",
+    },
+    room: {
+      type: String,
+      trim: true,
+      default: "",
     },
     totalMarks: {
       type: Number,
-      required: [true, "Total marks is required"],
       default: 100,
     },
   },

@@ -1,0 +1,529 @@
+/* Auth Flow Styling */
+
+.auth-container {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, hsl(220, 30%, 10%), hsl(224, 76%, 35%));
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-xl);
+}
+
+body.dark-theme .auth-card {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.auth-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--text-inverse);
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1.5rem;
+}
+
+.auth-card .form-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.auth-card .form-input {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-inverse);
+}
+
+.auth-card .form-input:focus {
+  border-color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.auth-card select.form-input option {
+  background-color: hsl(220, 30%, 12%);
+  color: var(--text-inverse);
+}
+
+.auth-card a {
+  color: hsl(210, 100%, 80%);
+}
+
+.auth-card a:hover {
+  color: hsl(210, 100%, 90%);
+}
+
+.auth-card label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.auth-footer-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Custom Split Screen Layout for Redesigned Login */
+.login-split-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--bg-app);
+  overflow: hidden;
+  position: relative;
+}
+
+.login-left {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4.5rem;
+  position: relative;
+  background: linear-gradient(135deg, hsl(222, 47%, 9%), hsl(224, 76%, 20%));
+  color: var(--text-inverse);
+  overflow: hidden;
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  background: var(--bg-app);
+  position: relative;
+  transition: background-color var(--transition-normal);
+}
+
+/* Floating animated blobs for dynamic atmosphere */
+.blob {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blob-1 {
+  background: var(--primary);
+  top: 10%;
+  left: 10%;
+  animation: float-blob-1 12s infinite alternate ease-in-out;
+}
+
+.blob-2 {
+  background: var(--accent);
+  bottom: 15%;
+  right: 15%;
+  animation: float-blob-2 15s infinite alternate-reverse ease-in-out;
+}
+
+@keyframes float-blob-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -40px) scale(1.1); }
+  100% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+@keyframes float-blob-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 30px) scale(0.9); }
+  100% { transform: translate(30px, -20px) scale(1.05); }
+}
+
+/* Left Brand Pane Contents */
+.brand-content {
+  position: relative;
+  z-index: 10;
+  max-width: 520px;
+}
+
+.left-bg-glow {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.18) 0%, rgba(0,0,0,0) 70%);
+  top: -200px;
+  left: -200px;
+  pointer-events: none;
+}
+
+.brand-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-inverse);
+  font-size: 1.35rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.brand-logo-text {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  color: var(--text-inverse);
+}
+
+.brand-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: hsl(262, 100%, 75%);
+  margin-bottom: 0.75rem;
+}
+
+.brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(to right, #ffffff, #c7d2fe, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 3rem;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-fast);
+}
+
+.feature-item:hover {
+  transform: translateX(8px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.feature-icon-wrapper {
+  padding: 0.65rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.07);
+  color: hsl(262, 100%, 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.feature-text h4 {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-inverse);
+  margin-bottom: 0.25rem;
+}
+
+.feature-text p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+}
+
+/* Right Pane - Form Card Styling */
+.login-form-container {
+  width: 100%;
+  max-width: 450px;
+  z-index: 10;
+}
+
+.login-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 3rem 2.75rem;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  overflow: hidden;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+body.dark-theme .login-card {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+.login-card .auth-title {
+  color: var(--text-main);
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.login-card .auth-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+/* Header branding visible only on Mobile/Tablet */
+.login-header-logo {
+  display: none;
+  align-items: center;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.login-header-logo .brand-logo {
+  width: 38px;
+  height: 38px;
+  font-size: 1.15rem;
+}
+
+.login-header-logo span {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+/* Interactive Role Selector Cards Grid */
+.role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 0.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  user-select: none;
+}
+
+.role-card:hover {
+  border-color: hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 10%));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.role-card.active {
+  border-color: var(--primary);
+  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05);
+  box-shadow: 0 0 0 3px var(--primary-glow), var(--shadow-md);
+}
+
+body.dark-theme .role-card {
+  background: hsl(223, 47%, 18%);
+}
+
+body.dark-theme .role-card.active {
+  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.12);
+  border-color: var(--primary);
+}
+
+.role-card-icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.role-card.active .role-card-icon {
+  color: var(--primary);
+}
+
+.role-card-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.role-card-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--primary);
+  background: var(--bg-card);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.dark-theme .role-card-check {
+  background: hsl(223, 47%, 18%);
+}
+
+/* Custom Input Groups with Inner Icons */
+.input-group-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.15rem;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.input-icon-right:hover {
+  color: var(--text-main);
+}
+
+.input-custom {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.85rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+body.dark-theme .input-custom {
+  background-color: hsl(223, 47%, 18%);
+}
+
+.input-custom:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  background-color: var(--bg-card);
+}
+
+body.dark-theme .input-custom:focus {
+  background-color: hsl(223, 47%, 18%);
+}
+
+.input-custom-has-right {
+  padding-right: 2.85rem;
+}
+
+.login-card .form-label {
+  color: var(--text-main);
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+/* Premium Button Styling overrides inside Login Card */
+.login-card .btn-primary {
+  padding: 0.9rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  background: linear-gradient(135deg, var(--primary), hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) - 5%)));
+  box-shadow: 0 4px 14px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.25);
+  border: none;
+}
+
+.login-card .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.35);
+  background: linear-gradient(135deg, hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 3%)), var(--primary-hover));
+}
+
+.login-card .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-card .btn-secondary {
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.5rem;
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.login-card .btn-secondary:hover:not(:disabled) {
+  background-color: var(--border-color);
+  transform: translateY(-1px);
+}
+
+/* Responsiveness overrides */
+@media (max-width: 991px) {
+  .login-left {
+    display: none;
+  }
+  .login-header-logo {
+    display: flex;
+  }
+  .login-right {
+    padding: 1.5rem;
+  }
+  .login-card {
+    padding: 2.25rem 1.75rem;
+  }
+}
+

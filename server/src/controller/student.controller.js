@@ -1,6 +1,6 @@
 import * as studentService from "../services/studentService.js";
 import bcrypt from "bcryptjs";
-import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
+import { generateAccessToken, generateRefreshToken, config_ENV } from "../config/auth.config.js";
 import { generateOTP, sendVerificationOtp, generateStudentId } from "../utils/index.js";
 
 // Register Student

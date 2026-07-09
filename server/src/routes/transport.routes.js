@@ -21,4 +21,4 @@ transportRouter.get("/student/:studentId", getStudentRouteDetails);
 
 // Vehicles
 transportRouter.get("/vehicles", getVehicles);
-transportRouter.put("/vehicles", restrictTo("admin"), updateVehicleDetails);
+transportRouter.put("/vehicles/:id", restrictTo("admin"), updateVehicleDetails);

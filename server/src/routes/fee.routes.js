@@ -14,7 +14,7 @@ feeRouter.route("/")
     .post(restrictTo("admin"), createFee);
 
 feeRouter.get("/student/:studentId", getFeesByStudent);
-feeRouter.put("/payment", restrictTo("admin"), updatePayment);
+feeRouter.put("/payment/:id", restrictTo("admin"), updatePayment);
 feeRouter.delete("/:id", restrictTo("admin"), deleteFee);
 
 // Invoices
@@ -22,3 +22,4 @@ feeRouter.get("/invoice/:id", getInvoice);
 
 // Direct Payment processing
 feeRouter.post("/record-payment", restrictTo("admin"), recordPayment);
+

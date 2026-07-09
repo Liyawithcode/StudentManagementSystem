@@ -28,11 +28,15 @@ export const createTimetable = async (req, res) => {
 export const getTimetableByClass = async (req, res) => {
   try {
     const { className, section, batch } = req.query;
-    if (!className || !section || !batch) {
-      return res.status(400).json({ success: false, message: "Required queries: className, section, batch" });
+    if (!className) {
+      return res.status(400).json({ success: false, message: "Required query: className" });
     }
 
-    const timetable = await Timetable.find({ className, section, batch });
+    const query = { className };
+    if (section) query.section = section;
+    if (batch) query.batch = batch;
+
+    const timetable = await Timetable.find(query);
     res.status(200).json({ success: true, count: timetable.length, timetable });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

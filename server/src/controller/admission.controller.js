@@ -1,6 +1,7 @@
 import { Student } from "../model/student.model.js";
 import { generateOTP, sendVerificationOtp, generateStudentId } from "../utils/index.js";
 import bcrypt from "bcryptjs";
+import { config_ENV } from "../config/auth.config.js";
 
 export const registerCandidate = async (req, res) => {
   try {

@@ -1,0 +1,92 @@
+/* modern-web-design system variables */
+
+:root {
+  /* Color Palette (Deep Sapphire & Indigo Theme) */
+  --primary-hue: 224;
+  --primary-sat: 76%;
+  --primary-light: 48%;
+  /* #1e40af */
+
+  --primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+  --primary-hover: hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) - 8%));
+  --primary-glow: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+
+  --accent: hsl(262, 83%, 58%);
+  /* Vibrant Purple */
+  --accent-hover: hsl(262, 83%, 50%);
+  --accent-glow: hsla(262, 83%, 58%, 0.15);
+
+  --success: hsl(142, 72%, 29%);
+  --success-bg: hsl(142, 72%, 95%);
+  --warning: hsl(38, 92%, 50%);
+  --warning-bg: hsl(38, 92%, 96%);
+  --danger: hsl(350, 89%, 60%);
+  --danger-bg: hsl(350, 89%, 96%);
+  --info: hsl(199, 89%, 48%);
+  --info-bg: hsl(199, 89%, 95%);
+
+  /* Light Theme Defaults */
+  --bg-app: hsl(210, 40%, 96%);
+  --bg-sidebar: hsl(220, 30%, 12%);
+  /* Dark sidebar for premium contrast */
+  --bg-card: hsl(0, 0%, 100%);
+  --bg-header: hsla(0, 0%, 100%, 0.8);
+
+  --border-color: hsl(214, 32%, 91%);
+  --border-focus: var(--primary);
+
+  --text-main: hsl(215, 28%, 17%);
+  --text-muted: hsl(215, 16%, 47%);
+  --text-inverse: hsl(0, 0%, 100%);
+  --text-on-sidebar: hsl(218, 12%, 80%);
+  --text-on-sidebar-active: hsl(0, 0%, 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 70px;
+  --header-height: 70px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* Font Families */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(12px);
+}
+
+/* Dark Mode Overrides (Optional Toggle via .dark-theme) */
+body.dark-theme {
+  --bg-app: hsl(222, 47%, 11%);
+  --bg-card: hsl(223, 47%, 15%);
+  --bg-header: hsla(223, 47%, 15%, 0.8);
+
+  --border-color: hsl(223, 30%, 22%);
+  --text-main: hsl(210, 40%, 98%);
+  --text-muted: hsl(215, 20%, 65%);
+
+  --glass-bg: rgba(15, 23, 42, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(16px);
+
+  --success-bg: hsla(142, 72%, 29%, 0.15);
+  --warning-bg: hsla(38, 92%, 50%, 0.15);
+  --danger-bg: hsla(350, 89%, 60%, 0.15);
+  --info-bg: hsla(199, 89%, 48%, 0.15);
+}

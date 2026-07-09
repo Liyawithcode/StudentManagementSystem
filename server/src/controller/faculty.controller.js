@@ -1,17 +1,33 @@
 import * as teacherService from "../services/teacherService.js";
 import bcrypt from "bcryptjs";
-import { generateAccessToken, generateRefreshToken } from "../config/auth.config.js";
+import { generateAccessToken, generateRefreshToken, config_ENV } from "../config/auth.config.js";
 import { generateOTP, sendVerificationOtp, generateFacultyId } from "../utils/index.js";
 
 // Register Faculty
 export const registerFaculty = async (req, res) => {
   try {
-    const { email, password, facultyId, firstName, lastName, department, qualification, salary, ...facultyData } = req.body;
+    let { email, password, facultyId, firstName, lastName, facultyfullname, department, qualification, salary, ...facultyData } = req.body;
 
-    if (!email || !password || !firstName || !lastName || !department || !qualification || salary === undefined) {
+    // Handle parsing of facultyfullname if firstName/lastName not provided directly
+    if ((!firstName || !lastName) && facultyfullname) {
+      const parts = facultyfullname.trim().split(/\s+/);
+      firstName = firstName || parts[0] || "Faculty";
+      lastName = lastName || parts.slice(1).join(" ") || "Member";
+    }
+
+    // Set defaults if not provided
+    firstName = firstName || "Faculty";
+    lastName = lastName || "Member";
+    department = department || "General";
+    qualification = qualification || "Not Specified";
+    if (salary === undefined || salary === null) {
+      salary = 0;
+    }
+
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please fill all required fields: email, password, firstName, lastName, department, qualification, salary",
+        message: "Please fill all required fields: email and password",
       });
     }
 
