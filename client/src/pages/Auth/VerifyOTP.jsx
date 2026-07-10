@@ -80,14 +80,14 @@ export const VerifyOTP = () => {
         
         <div className="brand-content animate-fade-in">
           <div className="brand-logo-container">
-            <div className="brand-logo">S</div>
-            <span className="brand-logo-text">SMS Portal</span>
+            <div className="brand-logo">I</div>
+            <span className="brand-logo-text">IntelliCampus Portal</span>
           </div>
           
           <div className="brand-tag">Academic System</div>
           <h1 className="brand-title">Empowering Smart Education</h1>
           <p className="brand-subtitle">
-            Welcome to the Student Management System. Access attendance records, grading history, academic performance metrics, and instant announcements in one unified portal.
+            Welcome to IntelliCampus. Access attendance records, grading history, academic performance metrics, and instant announcements in one unified portal.
           </p>
           
           <div className="features-list">
@@ -132,8 +132,8 @@ export const VerifyOTP = () => {
         <div className="login-form-container">
           {/* Header branding visible only on Mobile/Tablet */}
           <div className="login-header-logo">
-            <div className="brand-logo">S</div>
-            <span>SMS Portal</span>
+            <div className="brand-logo">I</div>
+            <span>IntelliCampus Portal</span>
           </div>
 
           <div className="login-card animate-fade-in">

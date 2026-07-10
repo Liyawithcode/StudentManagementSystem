@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FiSun, FiMoon } from 'react-icons/fi';
 import './Home.css';
 
 export const Home = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = document.body.classList.contains('dark-theme');
+    setDarkMode(isDark);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !darkMode;
+    setDarkMode(nextDark);
+    if (nextDark) {
+      document.body.classList.add('dark-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -17,6 +36,28 @@ export const Home = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // IntersectionObserver for elements revealing on scroll
+  useEffect(() => {
+    const revealElements = document.querySelectorAll('.reveal-on-scroll');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target); // Trigger animation only once
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      }
+    );
+
+    revealElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   const toggleMobileMenu = () => {
@@ -36,7 +77,7 @@ export const Home = () => {
             <div className="logo-icon-wrapper">
               <i className="fa-solid fa-graduation-cap"></i>
             </div>
-            <span className="logo-text">SMS</span>
+            <span className="logo-text">IntelliCampus</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -50,6 +91,9 @@ export const Home = () => {
 
           {/* Action Buttons */}
           <div className="nav-actions">
+            <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+              {darkMode ? <FiSun /> : <FiMoon />}
+            </button>
             <Link to="/login" className="btn-nav btn-nav-login">Login</Link>
             <Link to="/register" className="btn-nav btn-nav-register">Register</Link>
           </div>
@@ -74,6 +118,9 @@ export const Home = () => {
             <a href="#features" className="mobile-nav-link" onClick={closeMobileMenu}>Features</a>
             <a href="#stats" className="mobile-nav-link" onClick={closeMobileMenu}>Courses</a>
             <a href="#contact" className="mobile-nav-link" onClick={closeMobileMenu}>Contact</a>
+            <button className="theme-toggle-mobile" onClick={toggleTheme}>
+              {darkMode ? <><FiSun /> Light Mode</> : <><FiMoon /> Dark Mode</>}
+            </button>
             <div className="mobile-nav-divider"></div>
             <Link to="/login" className="mobile-nav-btn mobile-btn-login" onClick={closeMobileMenu}>Login</Link>
             <Link to="/register" className="mobile-nav-btn mobile-btn-register" onClick={closeMobileMenu}>Register</Link>
@@ -90,7 +137,7 @@ export const Home = () => {
               <span className="tag-text">Next-Generation Education Portal</span>
             </div>
             <h1 className="hero-title animate-fade-in-up">
-              Welcome to <span className="highlight-text">Student Management</span> System
+              Welcome to <span className="highlight-text">IntelliCampus</span>
             </h1>
             <p className="hero-subtitle">
               Manage students, teachers, courses, attendance, and results efficiently. An all-in-one platform for modern schools and universities.
@@ -188,7 +235,7 @@ export const Home = () => {
       {/* FEATURES SECTION */}
       <section id="features" className="features-section">
         <div className="section-container">
-          <div className="section-header text-center">
+          <div className="section-header text-center reveal-on-scroll">
             <span className="section-subtitle">System Capabilities</span>
             <h2 className="section-title">Powerful Features Built For You</h2>
             <div className="section-divider"></div>
@@ -199,7 +246,7 @@ export const Home = () => {
 
           <div className="features-grid">
             {/* Card 1: Student Registration */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-1">
               <div className="feature-icon-box card-icon-1">
                 <i className="fa-solid fa-user-plus"></i>
               </div>
@@ -210,7 +257,7 @@ export const Home = () => {
             </div>
 
             {/* Card 2: Attendance Management */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-2">
               <div className="feature-icon-box card-icon-2">
                 <i className="fa-solid fa-calendar-check"></i>
               </div>
@@ -221,7 +268,7 @@ export const Home = () => {
             </div>
 
             {/* Card 3: Course Management */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-3">
               <div className="feature-icon-box card-icon-3">
                 <i className="fa-solid fa-book-open"></i>
               </div>
@@ -232,7 +279,7 @@ export const Home = () => {
             </div>
 
             {/* Card 4: Teacher Management */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-1">
               <div className="feature-icon-box card-icon-4">
                 <i className="fa-solid fa-user-tie"></i>
               </div>
@@ -243,7 +290,7 @@ export const Home = () => {
             </div>
 
             {/* Card 5: Online Results */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-2">
               <div className="feature-icon-box card-icon-5">
                 <i className="fa-solid fa-award"></i>
               </div>
@@ -254,7 +301,7 @@ export const Home = () => {
             </div>
 
             {/* Card 6: Secure Login */}
-            <div className="feature-card animate-lift">
+            <div className="feature-card animate-lift reveal-on-scroll delay-3">
               <div className="feature-icon-box card-icon-6">
                 <i className="fa-solid fa-shield-halved"></i>
               </div>
@@ -270,7 +317,7 @@ export const Home = () => {
       {/* ABOUT SECTION */}
       <section id="about" className="about-section">
         <div className="section-container about-container">
-          <div className="about-illustration">
+          <div className="about-illustration reveal-on-scroll">
             {/* Premium Workspace Vector SVG */}
             <svg viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="svg-illustration">
               <rect width="100%" height="100%" fill="transparent" />
@@ -329,12 +376,12 @@ export const Home = () => {
             </svg>
           </div>
 
-          <div className="about-content">
+          <div className="about-content reveal-on-scroll delay-1">
             <span className="section-subtitle text-left">Who We Are</span>
             <h2 className="section-title">Designed For Seamless Educational Management</h2>
             <div className="section-divider align-left"></div>
             <p className="about-text">
-              The **Student Management System** is a state-of-the-art educational ERP application designed to bridge the gap between administrators, teachers, parents, and students. By automating core administrative operations, we empower educators to focus on what truly matters—enriching student learning and success.
+              **IntelliCampus** is a state-of-the-art educational ERP application designed to bridge the gap between administrators, teachers, parents, and students. By automating core administrative operations, we empower educators to focus on what truly matters—enriching student learning and success.
             </p>
             <p className="about-text">
               Our secure, role-based platform offers dynamic attendance tracking, seamless grading systems, robust timetable management, and automated alerts. Whether on a desktop computer, a tablet, or a mobile phone, stay connected to your educational workspace, anywhere and at any time.
@@ -366,7 +413,7 @@ export const Home = () => {
       {/* STATISTICS SECTION */}
       <section id="stats" className="stats-section">
         <div className="section-container stats-grid">
-          <div className="stat-card">
+          <div className="stat-card reveal-on-scroll delay-1">
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-user-graduate"></i>
             </div>
@@ -374,7 +421,7 @@ export const Home = () => {
             <div className="stat-label">Students Enrolled</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card reveal-on-scroll delay-2">
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-chalkboard-user"></i>
             </div>
@@ -382,7 +429,7 @@ export const Home = () => {
             <div className="stat-label">Expert Faculty</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card reveal-on-scroll delay-3">
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-book-atlas"></i>
             </div>
@@ -390,7 +437,7 @@ export const Home = () => {
             <div className="stat-label">Modern Courses</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card reveal-on-scroll delay-4">
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-chart-line"></i>
             </div>
@@ -403,7 +450,7 @@ export const Home = () => {
       {/* TESTIMONIALS SECTION */}
       <section className="testimonials-section">
         <div className="section-container">
-          <div className="section-header text-center">
+          <div className="section-header text-center reveal-on-scroll">
             <span className="section-subtitle">Student Testimonials</span>
             <h2 className="section-title">What Our Students Say</h2>
             <div className="section-divider"></div>
@@ -414,7 +461,7 @@ export const Home = () => {
 
           <div className="testimonials-grid">
             {/* Card 1 */}
-            <div className="testimonial-card">
+            <div className="testimonial-card reveal-on-scroll delay-1">
               <div className="testimonial-stars">
                 <i className="fa-solid fa-star"></i>
                 <i className="fa-solid fa-star"></i>
@@ -448,7 +495,7 @@ export const Home = () => {
             </div>
 
             {/* Card 2 */}
-            <div className="testimonial-card">
+            <div className="testimonial-card reveal-on-scroll delay-2">
               <div className="testimonial-stars">
                 <i className="fa-solid fa-star"></i>
                 <i className="fa-solid fa-star"></i>
@@ -481,7 +528,7 @@ export const Home = () => {
             </div>
 
             {/* Card 3 */}
-            <div className="testimonial-card">
+            <div className="testimonial-card reveal-on-scroll delay-3">
               <div className="testimonial-stars">
                 <i className="fa-solid fa-star"></i>
                 <i className="fa-solid fa-star"></i>
@@ -519,7 +566,7 @@ export const Home = () => {
       {/* CALL TO ACTION */}
       <section className="cta-section">
         <div className="cta-gradient-overlay"></div>
-        <div className="section-container cta-container text-center">
+        <div className="section-container cta-container text-center reveal-on-scroll">
           <h2 className="cta-title">Ready to Get Started?</h2>
           <p className="cta-desc">
             Empower your institution, streamline your administrative workflows, and keep students connected to class schedules and academic updates in one centralized space.
@@ -537,7 +584,7 @@ export const Home = () => {
           <div className="footer-col footer-col-about">
             <div className="footer-logo">
               <i className="fa-solid fa-graduation-cap"></i>
-              <span>SMS</span>
+              <span>IntelliCampus</span>
             </div>
             <p className="footer-about-text">
               Providing modern enterprise planning tools to schools, universities, and academic institutions, enhancing communication and database productivity globally.
@@ -586,7 +633,7 @@ export const Home = () => {
         <div className="footer-bottom text-center">
           <div className="section-container">
             <p className="copyright-text">
-              Copyright &copy; 2026 Student Management System. All Rights Reserved.
+              Copyright &copy; 2026 IntelliCampus. All Rights Reserved.
             </p>
           </div>
         </div>

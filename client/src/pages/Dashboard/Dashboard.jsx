@@ -175,7 +175,7 @@ export const Dashboard = () => {
   });
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="page-entrance" style={{ maxWidth: '1400px', margin: '0 auto' }}>
 
       {/* Welcome Greeting Banner */}
       <div className="welcome-banner">

@@ -4,7 +4,7 @@ import { config_ENV } from "../config/auth.config.js";
 export const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const mailOptions = {
-            from: `"${process.env.EMAIL_FROM_USER || 'Student Management System'}" <${config_ENV.EMAIL_USER}>`,
+            from: `"${process.env.EMAIL_FROM_USER || 'IntelliCampus'}" <${config_ENV.EMAIL_USER}>`,
             to,
             subject,
             text,
@@ -31,7 +31,7 @@ export const sendVerificationOtp = async (email, otp, userName = "Unverified Use
             <h2 style="color: #4f46e5; font-size: 24px; font-weight: 700; margin-top: 0; margin-bottom: 24px;">Verify Your Email Address</h2>
             <p style="font-size: 16px; color: #1e293b; line-height: 1.5; margin-bottom: 12px;">Hello ${userName},</p>
             <p style="font-size: 16px; color: #334155; line-height: 1.6; margin-bottom: 24px;">
-                Thank you for registering at Student Management System. Use the following 6-digit verification code to complete your signup process:
+                Thank you for registering at IntelliCampus. Use the following 6-digit verification code to complete your signup process:
             </p>
             <div style="text-align: center; margin: 30px 0;">
                 <div style="display: inline-block; background-color: #f1f5f9; padding: 16px 40px; border-radius: 12px; font-size: 32px; font-weight: 700; color: #4f46e5; letter-spacing: 4px; border: 1px solid #e2e8f0;">
@@ -41,7 +41,7 @@ export const sendVerificationOtp = async (email, otp, userName = "Unverified Use
             <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 8px;">This verification code is valid for 10 minutes.</p>
             <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">If you did not initiate this request, please ignore this email.</p>
             <div style="border-top: 1px solid #e2e8f0; margin-top: 30px; padding-top: 20px; text-align: center;">
-                <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">Student Management System</span>
+                <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">IntelliCampus</span>
             </div>
         </div>
     `;
@@ -78,7 +78,7 @@ export const sendPasswordResetOtp = async (email, otp, userName = "User") => {
             <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 8px;">This verification code is valid for 10 minutes.</p>
             <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">If you did not initiate this request, please ignore this email.</p>
             <div style="border-top: 1px solid #e2e8f0; margin-top: 30px; padding-top: 20px; text-align: center;">
-                <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">Student Management System</span>
+                <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">IntelliCampus</span>
             </div>
         </div>
     `;

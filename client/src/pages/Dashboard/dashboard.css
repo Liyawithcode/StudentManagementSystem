@@ -41,6 +41,55 @@
   }
 }
 
+/* Stagger stats cards entry animation */
+.premium-stats-grid .premium-stat-card {
+  animation: slideUpFade 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.premium-stats-grid .premium-stat-card:nth-child(1) { animation-delay: 0.1s; }
+.premium-stats-grid .premium-stat-card:nth-child(2) { animation-delay: 0.18s; }
+.premium-stats-grid .premium-stat-card:nth-child(3) { animation-delay: 0.26s; }
+.premium-stats-grid .premium-stat-card:nth-child(4) { animation-delay: 0.34s; }
+
+/* Stagger quick portal shortcuts */
+.quick-actions-grid .quick-action-btn {
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.quick-actions-grid .quick-action-btn:nth-child(1) { animation-delay: 0.05s; }
+.quick-actions-grid .quick-action-btn:nth-child(2) { animation-delay: 0.1s; }
+.quick-actions-grid .quick-action-btn:nth-child(3) { animation-delay: 0.15s; }
+.quick-actions-grid .quick-action-btn:nth-child(4) { animation-delay: 0.2s; }
+
+/* Quick Action Button Icons Bounce */
+.quick-action-btn:hover .quick-action-icon {
+  animation: actionIconBounce 0.6s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+}
+
+@keyframes actionIconBounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+/* Notice category tabs active transition */
+.notice-tab-btn {
+  position: relative;
+  overflow: hidden;
+}
+.notice-tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary);
+  transition: width 0.25s ease, left 0.25s ease;
+}
+.notice-tab-btn.active::after {
+  width: 80%;
+  left: 10%;
+}
+
 /* Dashboard Container & Grid spacing */
 .dashboard-grid {
   display: grid;
@@ -50,13 +99,13 @@
 
 /* Welcome Banner Component */
 .welcome-banner {
-  background: linear-gradient(135deg, hsl(224, 76%, 48%) 0%, hsl(262, 83%, 58%) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   border-radius: var(--radius-lg);
   padding: 2.25rem;
-  color: #ffffff;
+  color: var(--text-inverse);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-lg), 0 10px 25px -5px hsla(262, 83%, 58%, 0.3);
+  box-shadow: var(--shadow-lg), 0 10px 25px -5px hsla(325, 45%, 35%, 0.25);
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -40,20 +40,20 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(215, 15%, 80%);
+  background: hsl(38, 15%, 80%);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(215, 15%, 70%);
+  background: hsl(38, 15%, 70%);
 }
 
 body.dark-theme ::-webkit-scrollbar-thumb {
-  background: hsl(223, 20%, 30%);
+  background: hsl(325, 15%, 22%);
 }
 
 body.dark-theme ::-webkit-scrollbar-thumb:hover {
-  background: hsl(223, 20%, 40%);
+  background: hsl(325, 15%, 30%);
 }
 
 /* Animations */
@@ -71,11 +71,23 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
 
 @keyframes slideInRight {
   from {
-    transform: translateX(100%);
+    transform: translateX(120%);
+    opacity: 0;
   }
-
   to {
     transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pageEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -87,6 +99,14 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
 
 .animate-fade-in {
   animation: fadeIn var(--transition-normal) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-entrance {
+  animation: pageEntrance var(--transition-slow) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Utility Layout Classes */
@@ -234,7 +254,7 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
 
 .btn-primary {
   background-color: var(--primary);
-  color: var(--text-inverse);
+  color: var(--text-on-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -283,7 +303,7 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
 }
 
 .table th {
-  background-color: hsl(210, 40%, 98%);
+  background-color: hsl(38, 25%, 97%);
   color: var(--text-muted);
   font-weight: 600;
   padding: 1rem;
@@ -291,7 +311,7 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
 }
 
 body.dark-theme .table th {
-  background-color: hsl(223, 47%, 18%);
+  background-color: hsl(325, 30%, 14%);
 }
 
 .table td {
@@ -305,11 +325,11 @@ body.dark-theme .table th {
 }
 
 .table tr:hover td {
-  background-color: hsl(210, 40%, 98%);
+  background-color: hsl(38, 25%, 97%);
 }
 
 body.dark-theme .table tr:hover td {
-  background-color: hsl(223, 47%, 18%);
+  background-color: hsl(325, 30%, 14%);
 }
 
 /* Badges */

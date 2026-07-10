@@ -4,7 +4,7 @@ import { config_ENV } from "../config/auth.config.js";
 export const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const mailOptions = {
-            from: `"${process.env.EMAIL_FROM_USER || 'Student Management System'}" <${config_ENV.EMAIL_USER}>`,
+            from: `"${process.env.EMAIL_FROM_USER || 'IntelliCampus'}" <${config_ENV.EMAIL_USER}>`,
             to,
             subject,
             text,

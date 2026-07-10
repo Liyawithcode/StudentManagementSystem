@@ -42,9 +42,20 @@ export const Register = () => {
     setLoading(true);
     try {
       toast.info('Authenticating with Google...');
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
+      let idToken;
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        idToken = await user.getIdToken();
+      } catch (popupErr) {
+        console.error('Google popup sign-in failed:', popupErr);
+        if (import.meta.env.DEV) {
+          toast.info('Google Sign-In failed. Falling back to developer mock login...');
+          idToken = 'mock_google_id_token';
+        } else {
+          throw popupErr;
+        }
+      }
 
       const backendRes = await authService.googleLogin(idToken, selectedRole);
       if (backendRes.success) {
@@ -122,14 +133,14 @@ export const Register = () => {
 
         <div className="brand-content animate-fade-in">
           <div className="brand-logo-container">
-            <div className="brand-logo">S</div>
-            <span className="brand-logo-text">SMS Portal</span>
+            <div className="brand-logo">I</div>
+            <span className="brand-logo-text">IntelliCampus Portal</span>
           </div>
 
           <div className="brand-tag">Academic System</div>
           <h1 className="brand-title">Empowering Smart Education</h1>
           <p className="brand-subtitle">
-            Welcome to the Student Management System. Access attendance records, grading history, academic performance metrics, and instant announcements in one unified portal.
+            Welcome to IntelliCampus. Access attendance records, grading history, academic performance metrics, and instant announcements in one unified portal.
           </p>
 
           <div className="features-list">
@@ -174,13 +185,13 @@ export const Register = () => {
         <div className="login-form-container">
           {/* Header branding visible only on Mobile/Tablet */}
           <div className="login-header-logo">
-            <div className="brand-logo">S</div>
-            <span>SMS Portal</span>
+            <div className="brand-logo">I</div>
+            <span>IntelliCampus Portal</span>
           </div>
 
           <div className="login-card animate-fade-in">
-            <h2 className="auth-title text-center">SMS Portal Registration</h2>
-            <p className="auth-subtitle text-center">Create a portal account to join the Student Management System.</p>
+            <h2 className="auth-title text-center">IntelliCampus Registration</h2>
+            <p className="auth-subtitle text-center">Create a portal account to join IntelliCampus.</p>
 
             <form onSubmit={handleSubmit}>
 

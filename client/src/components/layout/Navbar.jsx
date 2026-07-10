@@ -18,8 +18,10 @@ export const Navbar = ({ toggleSidebar }) => {
     setDarkMode(nextDark);
     if (nextDark) {
       document.body.classList.add('dark-theme');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.body.classList.remove('dark-theme');
+      localStorage.setItem('theme', 'light');
     }
   };
 
@@ -35,7 +37,7 @@ export const Navbar = ({ toggleSidebar }) => {
         <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
           <FiMenu />
         </button>
-        <h2 className="navbar-title">Student Management System</h2>
+        <h2 className="navbar-title">IntelliCampus</h2>
       </div>
 
       <div className="navbar-right flex items-center gap-4">

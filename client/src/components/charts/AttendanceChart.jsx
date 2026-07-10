@@ -21,8 +21,8 @@ export const AttendanceChart = ({ dataPoints, labels }) => {
       {
         label: 'Attendance Rate (%)',
         data: dataPoints || [95, 92, 94, 96, 93, 97],
-        borderColor: '#1e40af',
-        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+        borderColor: '#dcb378',
+        backgroundColor: 'rgba(220, 179, 120, 0.15)',
         tension: 0.4,
         fill: true,
       },

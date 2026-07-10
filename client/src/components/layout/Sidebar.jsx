@@ -67,8 +67,8 @@ export const Sidebar = ({ collapsed }) => {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-brand flex items-center gap-2">
-        <FiActivity className="brand-logo" />
-        {!collapsed && <span className="brand-name">Antigravity SMS</span>}
+        <FiBookOpen className="brand-logo" />
+        {!collapsed && <span className="brand-name">IntelliCampus</span>}
       </div>
 
       <nav className="sidebar-nav">

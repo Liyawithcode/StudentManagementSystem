@@ -124,7 +124,7 @@ export const ExamList = () => {
         <body>
           <div class="header">
             <h1>${title}</h1>
-            <p>Student Management System Portal</p>
+            <p>IntelliCampus Portal</p>
             <p>Generated on: ${new Date().toLocaleDateString()}</p>
           </div>
           <table>
@@ -142,7 +142,7 @@ export const ExamList = () => {
             </tbody>
           </table>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Student Management System. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} IntelliCampus. All rights reserved.</p>
           </div>
         </body>
       </html>

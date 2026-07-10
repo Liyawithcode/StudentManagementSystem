@@ -3,7 +3,7 @@
 .auth-container {
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, hsl(220, 30%, 10%), hsl(224, 76%, 35%));
+  background: linear-gradient(135deg, hsl(325, 35%, 10%), hsl(325, 40%, 25%));
   padding: 1.5rem;
 }
 
@@ -51,16 +51,16 @@ body.dark-theme .auth-card {
 }
 
 .auth-card select.form-input option {
-  background-color: hsl(220, 30%, 12%);
+  background-color: hsl(325, 30%, 12%);
   color: var(--text-inverse);
 }
 
 .auth-card a {
-  color: hsl(210, 100%, 80%);
+  color: hsl(38, 45%, 75%);
 }
 
 .auth-card a:hover {
-  color: hsl(210, 100%, 90%);
+  color: hsl(38, 45%, 85%);
 }
 
 .auth-card label {
@@ -89,7 +89,7 @@ body.dark-theme .auth-card {
   justify-content: center;
   padding: 4.5rem;
   position: relative;
-  background: linear-gradient(135deg, hsl(222, 47%, 9%), hsl(224, 76%, 20%));
+  background: linear-gradient(135deg, hsl(325, 40%, 6%), hsl(325, 40%, 15%));
   color: var(--text-inverse);
   overflow: hidden;
 }
@@ -195,7 +195,7 @@ body.dark-theme .auth-card {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: hsl(262, 100%, 75%);
+  color: var(--primary);
   margin-bottom: 0.75rem;
 }
 
@@ -205,7 +205,7 @@ body.dark-theme .auth-card {
   font-weight: 800;
   line-height: 1.15;
   margin-bottom: 1.5rem;
-  background: linear-gradient(to right, #ffffff, #c7d2fe, #a5b4fc);
+  background: linear-gradient(to right, #ffffff, hsl(38, 40%, 80%), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -245,7 +245,7 @@ body.dark-theme .auth-card {
   padding: 0.65rem;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.07);
-  color: hsl(262, 100%, 75%);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,7 +360,7 @@ body.dark-theme .login-card {
 }
 
 body.dark-theme .role-card {
-  background: hsl(223, 47%, 18%);
+  background: hsl(325, 30%, 14%);
 }
 
 body.dark-theme .role-card.active {
@@ -400,7 +400,7 @@ body.dark-theme .role-card.active {
 }
 
 body.dark-theme .role-card-check {
-  background: hsl(223, 47%, 18%);
+  background: hsl(325, 30%, 14%);
 }
 
 /* Custom Input Groups with Inner Icons */
@@ -453,7 +453,7 @@ body.dark-theme .role-card-check {
 }
 
 body.dark-theme .input-custom {
-  background-color: hsl(223, 47%, 18%);
+  background-color: hsl(325, 30%, 14%);
 }
 
 .input-custom:focus {
@@ -464,7 +464,7 @@ body.dark-theme .input-custom {
 }
 
 body.dark-theme .input-custom:focus {
-  background-color: hsl(223, 47%, 18%);
+  background-color: hsl(325, 30%, 14%);
 }
 
 .input-custom-has-right {

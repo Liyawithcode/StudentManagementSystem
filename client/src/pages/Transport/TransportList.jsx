@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
 import Button from '../../components/common/Button.jsx';
@@ -16,7 +16,7 @@ export const TransportList = () => {
   const [routes, setRoutes] = useState([]);
   const [studentRoute, setStudentRoute] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
 
@@ -26,17 +26,13 @@ export const TransportList = () => {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [deleteRouteId, setDeleteRouteId] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const routesRes = await transportService.getRoutes();
       const fetchedRoutes = routesRes.routes || [];
       setRoutes(fetchedRoutes);
-      
+
       let initialSelected = null;
       if (role === 'student') {
         const studentId = user?._id || user?.studentId;
@@ -47,20 +43,25 @@ export const TransportList = () => {
             initialSelected = studentRouteRes.route;
           }
         } catch (err) {
-          // ignore 404 for student route
+          console.warn('Student route not found or failed to load:', err);
         }
       }
-      
+
       if (!initialSelected && fetchedRoutes.length > 0) {
         initialSelected = fetchedRoutes[0];
       }
       setSelectedRoute(initialSelected);
     } catch (err) {
+      console.error('Error fetching transport routes:', err);
       toast.error('Failed to load transport routes');
     } finally {
       setLoading(false);
     }
-  };
+  }, [role, user]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAddRoute = async (e) => {
     e.preventDefault();
@@ -76,7 +77,7 @@ export const TransportList = () => {
         vehicleNumber: newRoute.vehicleNumber,
         stops
       };
-      
+
       const res = await transportService.createRoute(routeData);
       if (res.success) {
         toast.success('Transport route created successfully!');
@@ -89,6 +90,7 @@ export const TransportList = () => {
         setNewRoute({ routeNumber: '', driverName: '', driverPhone: '', vehicleNumber: '', stopsInput: '' });
       }
     } catch (err) {
+      console.error('Error creating route:', err);
       toast.error(err.message || 'Failed to create route');
     }
   };
@@ -104,12 +106,13 @@ export const TransportList = () => {
         toast.success('Student assigned to transport route!');
         setShowAssignModal(false);
         setAssignForm({ routeNumber: '', studentId: '' });
-        
+
         // Refresh routes
         const routesRes = await transportService.getRoutes();
         setRoutes(routesRes.routes || []);
       }
     } catch (err) {
+      console.error('Error assigning student:', err);
       toast.error(err.message || 'Failed to assign student');
     }
   };
@@ -127,6 +130,7 @@ export const TransportList = () => {
         setDeleteRouteId(null);
       }
     } catch (err) {
+      console.error('Error deleting route:', err);
       toast.error(err.message || 'Failed to delete route');
     }
   };
@@ -186,10 +190,10 @@ export const TransportList = () => {
             renderRow={(route) => {
               const isSelected = selectedRoute?._id === route._id;
               return (
-                <tr 
+                <tr
                   key={route._id}
                   onClick={() => setSelectedRoute(route)}
-                  style={{ 
+                  style={{
                     cursor: 'pointer',
                     background: isSelected ? 'var(--primary-glow)' : 'transparent',
                     borderLeft: isSelected ? '4px solid var(--primary)' : 'none'
@@ -202,9 +206,9 @@ export const TransportList = () => {
                   <td>{route.stops?.join(', ') || '-'}</td>
                   <td>
                     {role === 'admin' && (
-                      <Button 
-                        variant="danger" 
-                        style={{ padding: '0.4rem' }} 
+                      <Button
+                        variant="danger"
+                        style={{ padding: '0.4rem' }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteRouteId(route._id);
@@ -226,7 +230,7 @@ export const TransportList = () => {
           <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FiMapPin style={{ color: 'var(--primary)' }} /> Route Map & Stops
           </h4>
-          
+
           {selectedRoute ? (
             <div className="flex flex-column gap-3">
               <div style={{ background: 'var(--bg-app)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>

@@ -16,6 +16,17 @@ function App() {
     });
   }, []);
 
+  // Initialize theme from localStorage or system preferences on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, []);
+
   return (
     <>
       <AppRoutes />
@@ -23,7 +34,7 @@ function App() {
       {/* Elegant Floating Toast Notification Overlay */}
       {toastData && (
         <div
-          className="animate-fade-in"
+          className="animate-slide-in-right"
           style={{
             position: 'fixed',
             bottom: '24px',
