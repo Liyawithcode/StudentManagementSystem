@@ -72,6 +72,18 @@ export const API_ENDPOINTS = {
     INVOICE: (id) => `/fees/invoice/${id}`,
     RECORD_PAYMENT: '/fees/record-payment',
   },
+  PAYMENTS: {
+    BASE: '/payments',
+    CREATE_ORDER: '/payments/create-order',
+    VERIFY: '/payments/verify',
+    OFFLINE: '/payments/offline',
+    STUDENT: (id) => `/payments/student/${id}`,
+    REFUND: '/payments/refund',
+  },
+  RECEIPT: {
+    BASE: '/receipt',
+    DOWNLOAD: (id) => `/receipt/download/${id}`,
+  },
   COMMUNICATION: {
     COMPLAINTS: '/communication/complaints',
     COMPLAINT_RESOLVE: (id) => `/communication/complaints/${id}/resolve`,

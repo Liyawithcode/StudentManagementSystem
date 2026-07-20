@@ -1,114 +1,163 @@
-import React, { useEffect, useState } from 'react';
-import Header from '../../components/layout/Header.jsx';
-import Table from '../../components/common/Table.jsx';
-import Button from '../../components/common/Button.jsx';
-import Loader from '../../components/common/Loader.jsx';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
-import { feeService } from '../../services/feeService.js';
-import { toast } from '../../utils/toast.js';
-import { formatDate } from '../../utils/dateFormatter.js';
-import { formatCurrency } from '../../utils/helpers.js';
-import { FiPlus, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
+import React, { useEffect, useState } from "react";
+import Header from "../../components/layout/Header.jsx";
+import Table from "../../components/common/Table.jsx";
+import Button from "../../components/common/Button.jsx";
+import Loader from "../../components/common/Loader.jsx";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.js";
+import { feeService } from "../../services/feeService.js";
+import { receiptService } from "../../services/receiptService.js";
+import { toast } from "../../utils/toast.js";
+import { formatDate } from "../../utils/dateFormatter.js";
+import { formatCurrency } from "../../utils/helpers.js";
+import { FiDollarSign, FiDownload, FiCheckCircle, FiFileText } from "react-icons/fi";
 
 export const FeeList = () => {
   const { role, user } = useAuth();
-  const [fees, setFees] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFees = async () => {
-      try {
-        let res;
-        if (role === 'student') {
-          // Students see only their own fees — try _id first, fallback to studentId
-          const studentIdentifier = user?._id || user?.studentId;
-          res = await feeService.getFeesByStudent(studentIdentifier);
-        } else {
-          // Admin / Faculty see all fees
-          res = await feeService.getAllFees();
-        }
-        setFees(res.fees || []);
-      } catch (err) {
-        toast.error('Failed to load fee ledger');
-      } finally {
-        setLoading(false);
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      let res;
+      if (role === "student") {
+        const studentIdentifier = user?.studentId || user?._id;
+        res = await feeService.getFeesByStudent(studentIdentifier);
+      } else {
+        res = await feeService.getAllFees(); // returns the fee structures
       }
-    };
-    fetchFees();
+      setPayments(res.fees || []);
+    } catch (err) {
+      toast.error("Failed to load fee information");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
   }, [role, user]);
 
-  const handleMarkPaid = async (feeId, paymentMethod) => {
+  const handleDownloadReceipt = async (paymentId, receiptNumber) => {
     try {
-      await feeService.updatePayment(feeId, { feeStatus: 'Paid', paymentMethod });
-      toast.success('Payment marked as Paid!');
-      setFees(fees.map((f) => f._id === feeId ? { ...f, feeStatus: 'Paid' } : f));
+      toast.info("Generating PDF Invoice Receipt...");
+      await receiptService.downloadReceiptPDF(paymentId, receiptNumber);
+      toast.success("Receipt downloaded successfully!");
     } catch (err) {
-      toast.error(err.message || 'Failed to update payment');
+      toast.error(err.message || "Failed to download receipt");
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Paid":
+        return "badge-success";
+      case "Processing":
+        return "badge-warning";
+      case "Refunded":
+        return "badge-info";
+      case "Failed":
+      case "Cancelled":
+        return "badge-danger";
+      default:
+        return "badge-secondary";
     }
   };
 
   return (
     <div>
       <Header
-        title={role === 'student' ? 'My Fee Records' : 'Fee & Billing Ledgers'}
-        subtitle={role === 'student' ? 'View your fee payment history and due invoices.' : 'Manage student tuitions, collections, and invoicing statuses.'}
+        title={role === "student" ? "My Tuition Invoices & Fees" : "Master Fee Structure configuration"}
+        subtitle={
+          role === "student"
+            ? "View outstanding fees, check online payment history, and download tax invoices."
+            : "Define master billing templates and automatically assign tuition invoices to student classes."
+        }
         actions={
-          role === 'admin' && (
-            <Link to="/fees/collect">
-              <Button variant="primary"><FiPlus /> Record Payment</Button>
-            </Link>
+          role === "admin" && (
+            <div className="flex gap-2">
+              <Link to="/fees/structures">
+                <Button variant="primary">Manage Fee Templates</Button>
+              </Link>
+            </div>
           )
         }
       />
 
       {loading ? (
         <Loader />
-      ) : (
+      ) : role === "student" ? (
         <div className="card mt-4">
           <Table
-            headers={['Invoice ID', 'Student', 'Fee Type', 'Amount', 'Due Date', 'Method', 'Status', ...(role === 'admin' ? ['Actions'] : [])]}
-            data={fees}
-            renderRow={(fee) => (
-              <tr key={fee._id}>
-                <td>#{fee._id ? fee._id.slice(-6).toUpperCase() : 'N/A'}</td>
-                <td style={{ fontWeight: 500 }}>{fee.studentId || '-'}</td>
-                <td>{fee.feeType || '-'}</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(fee.feeAmount)}</td>
-                <td>{formatDate(fee.dueDate)}</td>
+            headers={[
+              "Invoice ID",
+              "Fee Category",
+              "Total Amount",
+              "Paid",
+              "Outstanding Due",
+              "Due Date",
+              "Status",
+              "Actions",
+            ]}
+            data={payments}
+            renderRow={(payment) => (
+              <tr key={payment._id}>
+                <td>#{payment._id.slice(-6).toUpperCase()}</td>
+                <td style={{ fontWeight: 500 }}>{payment.feeCategory}</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(payment.totalAmount)}</td>
+                <td style={{ color: "var(--success)" }}>{formatCurrency(payment.paidAmount)}</td>
+                <td style={{ color: "var(--danger)", fontWeight: 600 }}>{formatCurrency(payment.dueAmount)}</td>
+                <td>{formatDate(payment.paymentDate || payment.createdAt)}</td>
                 <td>
-                  <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>
-                    {fee.paymentMethod || 'CASH'}
+                  <span className={`badge ${getStatusBadge(payment.paymentStatus)}`}>
+                    {payment.paymentStatus}
                   </span>
                 </td>
                 <td>
-                  <span className={`badge ${
-                    fee.feeStatus === 'Paid' ? 'badge-success' :
-                    fee.feeStatus === 'Partial' ? 'badge-warning' :
-                    'badge-danger'
-                  }`}>
-                    {fee.feeStatus === 'Paid' ? '✓ Paid' :
-                     fee.feeStatus === 'Partial' ? '◐ Partial' :
-                     '✗ Unpaid'}
-                  </span>
-                </td>
-                {role === 'admin' && (
-                  <td>
-                    {fee.feeStatus !== 'Paid' && (
+                  <div className="flex gap-2">
+                    {payment.paymentStatus && ["pending", "partial"].includes(payment.paymentStatus.toLowerCase()) && (
+                      <Link to={`/fees/pay/${payment._id}`}>
+                        <Button variant="success" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}>
+                          <FiDollarSign /> Pay Online
+                        </Button>
+                      </Link>
+                    )}
+
+                    {payment.paymentStatus && payment.paymentStatus.toLowerCase() === "paid" && (
                       <Button
-                        variant="success"
-                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
-                        onClick={() => handleMarkPaid(fee._id, fee.paymentMethod)}
+                        variant="primary"
+                        style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
+                        onClick={() => handleDownloadReceipt(payment._id, payment.receiptNumber)}
                       >
-                        <FiCheckCircle /> Mark Paid
+                        <FiDownload /> Receipt
                       </Button>
                     )}
-                  </td>
-                )}
+
+                    <Link to={`/fees/payments/${payment._id}`}>
+                      <Button variant="secondary" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}>
+                        <FiFileText /> Details
+                      </Button>
+                    </Link>
+                  </div>
+                </td>
               </tr>
             )}
-            emptyMessage="No billing or tuition records found"
+            emptyMessage="No pending fee invoices or past payment history found for your student profile."
           />
+        </div>
+      ) : (
+        /* For admin/faculty, redirect them or display structures */
+        <div className="card mt-4 text-center p-8 space-y-4">
+          <p>You can manage fee structures and view transaction ledgers using the sidebar links or buttons below.</p>
+          <div className="flex justify-center gap-4">
+            <Link to="/fees/structures">
+              <Button variant="primary">Manage Fee Templates</Button>
+            </Link>
+            <Link to="/fees/payments">
+              <Button variant="secondary">View Transaction Ledgers</Button>
+            </Link>
+          </div>
         </div>
       )}
     </div>

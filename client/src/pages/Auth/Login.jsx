@@ -39,7 +39,7 @@ export const Login = () => {
     }
     setLoading(true);
     try {
-      const resultAction = await dispatch(loginUser({ email, password }));
+      const resultAction = await dispatch(loginUser({ email, password, role }));
       if (loginUser.fulfilled.match(resultAction)) {
         const payload = resultAction.payload;
         if (payload?.requiresOtp) {

@@ -34,7 +34,7 @@ const studentSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
-      default:"",
+      default: "",
     },
     role: {
       type: String,
@@ -63,6 +63,16 @@ const studentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    class: {
+      type: String,
+      trim: true,
+      default: "Class 10",
+    },
+    semester: {
+      type: String,
+      trim: true,
+      default: "Semester 1",
+    },
     enrollmentStatus: {
       type: String,
       enum: ["Active", "Inactive", "Suspended", "Graduated"],
@@ -82,7 +92,7 @@ const studentSchema = new mongoose.Schema(
       default: "",
       select: false,
     },
-    verifyOtpExpire:{
+    verifyOtpExpire: {
       type: Date,
       default: null,
       select: false,
@@ -91,7 +101,7 @@ const studentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    
+
   }
 );
 

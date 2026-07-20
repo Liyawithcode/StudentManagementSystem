@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
+import SearchBar from '../../components/common/SearchBar.jsx';
 import Button from '../../components/common/Button.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Modal from '../../components/common/Modal.jsx';
@@ -15,6 +16,7 @@ export const HostelList = () => {
   const [rooms, setRooms] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
@@ -107,6 +109,22 @@ export const HostelList = () => {
     }
   };
 
+  const filteredRooms = rooms.filter((room) => {
+    const term = search.toLowerCase();
+    const roomNo = `Room #${room.roomNumber}`.toLowerCase();
+    const block = (room.block || '').toLowerCase();
+    const type = (room.type || '').toLowerCase();
+    const status = (room.status || '').toLowerCase();
+    const studentId = (room.studentId || '').toLowerCase();
+    return (
+      roomNo.includes(term) ||
+      block.includes(term) ||
+      type.includes(term) ||
+      status.includes(term) ||
+      studentId.includes(term)
+    );
+  });
+
   if (loading) return <Loader />;
 
   return (
@@ -125,22 +143,21 @@ export const HostelList = () => {
         }
       />
 
-      {/* Summary Row */}
-      {summary && (
-        <div className="premium-stats-grid mt-4">
+      {summary && role !== 'student' && (
+        <div className="stats-grid mt-4">
           <div className="premium-stat-card" style={{ '--stat-color': 'var(--primary)', '--stat-glow-color': 'var(--primary-glow)' }}>
             <div className="stat-details">
               <span className="stat-label">Total Rooms</span>
               <span className="stat-val">{summary.totalRooms || rooms.length}</span>
-              <span className="stat-desc">Across all blocks</span>
+              <span className="stat-desc">Registered campus hostel rooms</span>
             </div>
             <div className="stat-icon-wrapper"><FiHome /></div>
           </div>
-          <div className="premium-stat-card" style={{ '--stat-color': 'var(--success)', '--stat-glow-color': 'var(--success-bg)' }}>
+          <div className="premium-stat-card" style={{ '--stat-color': 'var(--danger)', '--stat-glow-color': 'var(--danger-bg)' }}>
             <div className="stat-details">
               <span className="stat-label">Allocated Rooms</span>
               <span className="stat-val">{summary.allocatedRooms || rooms.filter(r => r.status === 'Allocated').length}</span>
-              <span className="stat-desc">Currently occupied</span>
+              <span className="stat-desc">Rooms occupied by students</span>
             </div>
             <div className="stat-icon-wrapper"><FiHome /></div>
           </div>
@@ -157,10 +174,17 @@ export const HostelList = () => {
 
       {/* Room Allocations List */}
       <div className="card mt-4">
-        <h4 className="mb-4" style={{ fontFamily: 'Outfit', fontWeight: 600 }}>Hostel Rooms Registry</h4>
+        <div className="flex justify-between items-center mb-4 flex-responsive">
+          <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, margin: 0 }}>Hostel Rooms Registry</h4>
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search rooms by number, block, type, status, or student ID..."
+          />
+        </div>
         <Table
           headers={['Room Number', 'Block', 'Room Type', 'Status', 'Allocated Student', 'Actions']}
-          data={role === 'student' ? rooms.filter(r => r.studentId === user?.studentId) : rooms}
+          data={role === 'student' ? filteredRooms.filter(r => r.studentId === user?.studentId) : filteredRooms}
           renderRow={(room) => (
             <tr key={room._id}>
               <td style={{ fontWeight: 600 }}>Room #{room.roomNumber}</td>

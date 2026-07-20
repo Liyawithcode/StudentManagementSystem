@@ -58,6 +58,14 @@ import Result from '../pages/Exams/Result.jsx';
 import FeeList from '../pages/Fees/FeeList.jsx';
 import CollectFee from '../pages/Fees/CollectFee.jsx';
 import FeeReport from '../pages/Fees/FeeReport.jsx';
+import FeeStructure from '../pages/Fees/FeeStructure.jsx';
+import PaymentList from '../pages/Fees/PaymentList.jsx';
+import PaymentDetails from '../pages/Fees/PaymentDetails.jsx';
+import OfflineApprovals from '../pages/Fees/OfflineApprovals.jsx';
+import RevenueDashboard from '../pages/Fees/RevenueDashboard.jsx';
+import PayFees from '../pages/Fees/PayFees.jsx';
+import PaymentSuccess from '../pages/Fees/PaymentSuccess.jsx';
+import PaymentFailed from '../pages/Fees/PaymentFailed.jsx';
 
 // Departments
 import DepartmentList from '../pages/Departments/DepartmentList.jsx';
@@ -137,7 +145,15 @@ export const AppRoutes = () => {
         {/* Fees */}
         <Route path="fees" element={<FeeList />} />
         <Route path="fees/collect" element={<PrivateRoute allowedRoles={['admin']}><CollectFee /></PrivateRoute>} />
-        <Route path="fees/report" element={<FeeReport />} />
+        <Route path="fees/report" element={<PrivateRoute allowedRoles={['admin']}><FeeReport /></PrivateRoute>} />
+        <Route path="fees/structures" element={<PrivateRoute allowedRoles={['admin']}><FeeStructure /></PrivateRoute>} />
+        <Route path="fees/payments" element={<PrivateRoute allowedRoles={['admin']}><PaymentList /></PrivateRoute>} />
+        <Route path="fees/payments/:id" element={<PaymentDetails />} />
+        <Route path="fees/approvals" element={<PrivateRoute allowedRoles={['admin']}><OfflineApprovals /></PrivateRoute>} />
+        <Route path="fees/dashboard" element={<PrivateRoute allowedRoles={['admin']}><RevenueDashboard /></PrivateRoute>} />
+        <Route path="fees/pay/:id" element={<PrivateRoute allowedRoles={['student']}><PayFees /></PrivateRoute>} />
+        <Route path="fees/success" element={<PaymentSuccess />} />
+        <Route path="fees/failed" element={<PaymentFailed />} />
 
         {/* Departments */}
         <Route path="departments" element={<DepartmentList />} />

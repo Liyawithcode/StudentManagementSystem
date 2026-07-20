@@ -10,12 +10,18 @@ export const feeService = {
     return apiCall('post', API_ENDPOINTS.FEES.BASE, data);
   },
 
-  getFeesByStudent: async (studentId) => {
-    return apiCall('get', API_ENDPOINTS.FEES.STUDENT(studentId));
+  // ✅ Correct endpoint: PUT /api/fees/:id → updates the fee STRUCTURE
+  updateFeeStructure: async (id, data) => {
+    return apiCall('put', `${API_ENDPOINTS.FEES.BASE}/${id}`, data);
   },
 
+  // Legacy: PUT /api/fees/payment/:id → updates a student payment record status
   updatePayment: async (id, data) => {
     return apiCall('put', `${API_ENDPOINTS.FEES.PAYMENT}/${id}`, data);
+  },
+
+  getFeesByStudent: async (studentId) => {
+    return apiCall('get', API_ENDPOINTS.FEES.STUDENT(studentId));
   },
 
   deleteFee: async (id) => {

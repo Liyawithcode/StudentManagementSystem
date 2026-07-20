@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchCourses } from '../../redux/slices/courseSlice.js';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
+import SearchBar from '../../components/common/SearchBar.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Button from '../../components/common/Button.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -15,10 +16,18 @@ export const CourseList = () => {
   const dispatch = useDispatch();
   const { coursesList, loading } = useSelector((state) => state.courses);
   const { role } = useAuth();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
+
+  const filteredCourses = coursesList.filter((course) => {
+    const term = search.toLowerCase();
+    const code = (course.courseCode || course.code || '').toLowerCase();
+    const name = (course.courseName || course.name || '').toLowerCase();
+    return code.includes(term) || name.includes(term);
+  });
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this course?')) return;
@@ -45,12 +54,21 @@ export const CourseList = () => {
         }
       />
 
+
+      <div className="flex justify-between items-center mb-4 flex-responsive">
+        <SearchBar
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by course name or code..."
+        />
+      </div>
+
       {loading ? (
         <Loader />
       ) : (
         <Table
           headers={['Course Code', 'Course Name', 'Credits', 'Actions']}
-          data={coursesList}
+          data={filteredCourses}
           renderRow={(course) => (
             <tr key={course._id}>
               <td style={{ fontWeight: 600 }}>{course.courseCode || course.code}</td>
@@ -68,6 +86,7 @@ export const CourseList = () => {
               </td>
             </tr>
           )}
+          emptyMessage="No courses matching criteria found"
         />
       )}
     </div>

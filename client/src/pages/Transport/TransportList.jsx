@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
+import SearchBar from '../../components/common/SearchBar.jsx';
 import Button from '../../components/common/Button.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Modal from '../../components/common/Modal.jsx';
@@ -16,6 +17,7 @@ export const TransportList = () => {
   const [routes, setRoutes] = useState([]);
   const [studentRoute, setStudentRoute] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -135,6 +137,20 @@ export const TransportList = () => {
     }
   };
 
+  const filteredRoutes = routes.filter((route) => {
+    const term = search.toLowerCase();
+    const routeNo = `Route #${route.routeNumber}`.toLowerCase();
+    const vehicle = (route.vehicleNumber || '').toLowerCase();
+    const driver = (route.driverName || '').toLowerCase();
+    const stops = (route.stops?.join(', ') || '').toLowerCase();
+    return (
+      routeNo.includes(term) ||
+      vehicle.includes(term) ||
+      driver.includes(term) ||
+      stops.includes(term)
+    );
+  });
+
   if (loading) return <Loader />;
 
   return (
@@ -183,10 +199,17 @@ export const TransportList = () => {
       <div className="dashboard-details-row mt-4">
         {/* Left: Transport Routes Registry */}
         <div className="card">
-          <h4 className="mb-4" style={{ fontFamily: 'Outfit', fontWeight: 600 }}>Transport Routes Catalog</h4>
+          <div className="flex justify-between items-center mb-4 flex-responsive">
+            <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, margin: 0 }}>Transport Routes Catalog</h4>
+            <SearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by route, vehicle, driver, or stops..."
+            />
+          </div>
           <Table
             headers={['Route #', 'Vehicle #', 'Driver', 'Driver Phone', 'Route Stops', 'Actions']}
-            data={routes}
+            data={filteredRoutes}
             renderRow={(route) => {
               const isSelected = selectedRoute?._id === route._id;
               return (

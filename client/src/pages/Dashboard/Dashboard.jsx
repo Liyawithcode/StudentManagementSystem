@@ -95,10 +95,10 @@ export const Dashboard = () => {
     studentsCount: stats.students,
     teachersCount: stats.faculty,
     coursesCount: stats.courses,
-    libraryBooks: stats.libraryBooks || 1280,
-    hostelRooms: stats.hostelRooms || 120,
-    transportRoutes: stats.transportRoutes || 18,
-    unpaidFeesInvoices: stats.unpaidFeesInvoices || 5,
+    libraryBooks: stats.libraryBooks !== undefined ? stats.libraryBooks : 1280,
+    hostelRooms: stats.hostelRooms !== undefined ? stats.hostelRooms : 120,
+    transportRoutes: stats.transportRoutes !== undefined ? stats.transportRoutes : 18,
+    unpaidFeesInvoices: stats.unpaidFeesInvoices !== undefined ? stats.unpaidFeesInvoices : 5,
     recentNotices: stats.recentNotices || [
       { id: '1', title: 'Summer Vacations Announcement', date: '2026-06-25', category: 'General', postedBy: 'Dean of Academics' },
       { id: '2', title: 'Final Semester Examinations Schedule', date: '2026-06-22', category: 'Academic', postedBy: 'Controller of Exams' },
@@ -117,6 +117,212 @@ export const Dashboard = () => {
       { id: '2', title: 'Final Semester Examinations Schedule', date: '2026-06-22', category: 'Academic', postedBy: 'Controller of Exams' },
       { id: '3', title: 'Annual Sports Day Registrations Open', date: '2026-06-18', category: 'Events', postedBy: 'Sports Committee' },
     ],
+  };
+
+  const getRoleCards = () => {
+    const role = user?.role || 'admin';
+    
+    if (role === 'student') {
+      const pendingFeesAmount = stats?.pendingFeesAmount !== undefined ? stats.pendingFeesAmount : 0;
+      return [
+        {
+          label: "Attendance Rate",
+          val: stats?.attendanceRate !== undefined ? `${stats.attendanceRate}%` : "92.5%",
+          change: "Active",
+          changeType: "info-badge",
+          desc: "Based on class records",
+          icon: <FiUserCheck />,
+          color: "hsl(224, 76%, 48%)",
+          glow: "rgba(30, 64, 175, 0.12)"
+        },
+        {
+          label: "Academic Performance",
+          val: stats?.performance !== undefined && stats?.performance > 0 ? `${stats.performance}%` : "85.0%",
+          change: "Term Grade",
+          changeType: "positive",
+          desc: "Cumulative average percentage",
+          icon: <FiTrendingUp />,
+          color: "hsl(262, 83%, 58%)",
+          glow: "rgba(99, 102, 241, 0.12)"
+        },
+        {
+          label: "Enrolled Courses",
+          val: stats?.courses !== undefined ? stats.courses : 4,
+          change: "Current Sem",
+          changeType: "info-badge",
+          desc: "Registered this term",
+          icon: <FiBookOpen />,
+          color: "hsl(142, 72%, 29%)",
+          glow: "rgba(16, 185, 129, 0.12)"
+        },
+        {
+          label: "Pending Fees",
+          val: formatCurrency(pendingFeesAmount),
+          change: stats?.unpaidFeesInvoices > 0 ? `${stats.unpaidFeesInvoices} Pending` : "No Dues",
+          changeType: stats?.unpaidFeesInvoices > 0 ? "negative" : "positive",
+          desc: "Outstanding payment due",
+          icon: <FiDollarSign />,
+          color: "hsl(38, 92%, 50%)",
+          glow: "rgba(245, 158, 11, 0.12)"
+        }
+      ];
+    }
+    
+    if (role === 'faculty') {
+      return [
+        {
+          label: "Assigned Subjects",
+          val: stats?.subjects !== undefined ? stats.subjects : 3,
+          change: "Allocated",
+          changeType: "info-badge",
+          desc: "Subjects allocated to teach",
+          icon: <FiBook />,
+          color: "hsl(224, 76%, 48%)",
+          glow: "rgba(30, 64, 175, 0.12)"
+        },
+        {
+          label: "Weekly Lectures",
+          val: stats?.weeklyClasses !== undefined ? stats.weeklyClasses : 8,
+          change: "Scheduled",
+          changeType: "positive",
+          desc: "Lectures scheduled this week",
+          icon: <FiCalendar />,
+          color: "hsl(262, 83%, 58%)",
+          glow: "rgba(99, 102, 241, 0.12)"
+        },
+        {
+          label: "My Students",
+          val: stats?.students !== undefined ? stats.students : 120,
+          change: "Department-wide",
+          changeType: "info-badge",
+          desc: "Students in your department",
+          icon: <FiUsers />,
+          color: "hsl(142, 72%, 29%)",
+          glow: "rgba(16, 185, 129, 0.12)"
+        },
+        {
+          label: "Pending Leaves",
+          val: stats?.pendingLeaves !== undefined ? stats.pendingLeaves : 0,
+          change: stats?.pendingLeaves > 0 ? "Awaiting Review" : "All Approved",
+          changeType: stats?.pendingLeaves > 0 ? "negative" : "positive",
+          desc: "Leave requests pending approval",
+          icon: <FiFileText />,
+          color: "hsl(38, 92%, 50%)",
+          glow: "rgba(245, 158, 11, 0.12)"
+        }
+      ];
+    }
+    
+    // Default: Admin
+    return [
+      {
+        label: "Total Students",
+        val: displayStats.studentsCount,
+        change: "+4.8%",
+        changeType: "positive",
+        desc: "Enrolled in dynamic programs",
+        icon: <FiUsers />,
+        color: "hsl(224, 76%, 48%)",
+        glow: "rgba(30, 64, 175, 0.12)"
+      },
+      {
+        label: "Total Faculty",
+        val: displayStats.teachersCount,
+        change: "+2 new",
+        changeType: "positive",
+        desc: "Active professors & advisors",
+        icon: <FiUsers />,
+        color: "hsl(262, 83%, 58%)",
+        glow: "rgba(99, 102, 241, 0.12)"
+      },
+      {
+        label: "Active Courses",
+        val: displayStats.coursesCount,
+        change: "6 Depts",
+        changeType: "info-badge",
+        desc: "Across all semesters",
+        icon: <FiBookOpen />,
+        color: "hsl(142, 72%, 29%)",
+        glow: "rgba(16, 185, 129, 0.12)"
+      },
+      {
+        label: "Unpaid Fees Invoices",
+        val: displayStats.unpaidFeesInvoices,
+        change: "Pending",
+        changeType: "negative",
+        desc: "Fee reports outstanding",
+        icon: <FiDollarSign />,
+        color: "hsl(38, 92%, 50%)",
+        glow: "rgba(245, 158, 11, 0.12)"
+      }
+    ];
+  };
+
+  const getSecondaryStats = () => {
+    const role = user?.role || 'admin';
+    
+    if (role === 'student') {
+      return [
+        {
+          label: "Books Issued",
+          val: stats?.libraryBooks !== undefined ? stats.libraryBooks : 0,
+          desc: "Books currently borrowed",
+          icon: <FiBook />,
+          color: "hsl(199, 89%, 48%)",
+          glow: "rgba(56, 189, 248, 0.12)",
+          link: "/library"
+        },
+        {
+          label: "My Hostel Room",
+          val: stats?.hostelRooms !== undefined ? stats.hostelRooms : "Not Allocated",
+          desc: "Allocated campus room",
+          icon: <FiHome />,
+          color: "hsl(350, 89%, 60%)",
+          glow: "rgba(244, 63, 94, 0.12)",
+          link: "/hostels"
+        },
+        {
+          label: "My Transport Route",
+          val: stats?.transportRoutes !== undefined ? stats.transportRoutes : "Not Assigned",
+          desc: "Assigned shuttle service",
+          icon: <FiMapPin />,
+          color: "hsl(271, 91%, 65%)",
+          glow: "rgba(168, 85, 247, 0.12)",
+          link: "/transport"
+        }
+      ];
+    }
+    
+    // Admin & Faculty
+    return [
+      {
+        label: "Library Inventory",
+        val: displayStats.libraryBooks,
+        desc: "Total reference books",
+        icon: <FiBook />,
+        color: "hsl(199, 89%, 48%)",
+        glow: "rgba(56, 189, 248, 0.12)",
+        link: "/library"
+      },
+      {
+        label: "Hostel Allocations",
+        val: displayStats.hostelRooms,
+        desc: "Rooms currently allocated",
+        icon: <FiHome />,
+        color: "hsl(350, 89%, 60%)",
+        glow: "rgba(244, 63, 94, 0.12)",
+        link: "/hostels"
+      },
+      {
+        label: "Transport Routes",
+        val: displayStats.transportRoutes,
+        desc: "Active shuttle buses",
+        icon: <FiMapPin />,
+        color: "hsl(271, 91%, 65%)",
+        glow: "rgba(168, 85, 247, 0.12)",
+        link: "/transport"
+      }
+    ];
   };
 
   // Detailed notices body descriptions
@@ -269,61 +475,31 @@ export const Dashboard = () => {
 
       {/* Premium Stats Grid */}
       <div className="premium-stats-grid">
-        <div className="premium-stat-card" style={{ '--stat-color': 'hsl(224, 76%, 48%)', '--stat-glow-color': 'rgba(30, 64, 175, 0.12)' }}>
-          <div className="stat-details">
-            <span className="stat-label">Total Students</span>
-            <div className="stat-value-container">
-              <span className="stat-val">{displayStats.studentsCount}</span>
-              <span className="stat-change positive"><FiTrendingUp /> +4.8%</span>
+        {getRoleCards().map((card, idx) => (
+          <div 
+            key={idx} 
+            className="premium-stat-card" 
+            style={{ '--stat-color': card.color, '--stat-glow-color': card.glow }}
+          >
+            <div className="stat-details">
+              <span className="stat-label">{card.label}</span>
+              <div className="stat-value-container">
+                <span className="stat-val">{card.val}</span>
+                {card.change && (
+                  <span className={`stat-change ${card.changeType === 'positive' ? 'positive' : card.changeType === 'negative' ? 'negative' : 'info-badge'}`}>
+                    {card.changeType === 'positive' && <FiTrendingUp />}
+                    {card.changeType === 'negative' && <FiTrendingDown />}
+                    {card.change}
+                  </span>
+                )}
+              </div>
+              <span className="stat-desc">{card.desc}</span>
             </div>
-            <span className="stat-desc">Enrolled in dynamic programs</span>
-          </div>
-          <div className="stat-icon-wrapper">
-            <FiUsers />
-          </div>
-        </div>
-
-        <div className="premium-stat-card" style={{ '--stat-color': 'hsl(262, 83%, 58%)', '--stat-glow-color': 'rgba(99, 102, 241, 0.12)' }}>
-          <div className="stat-details">
-            <span className="stat-label">Total Faculty</span>
-            <div className="stat-value-container">
-              <span className="stat-val">{displayStats.teachersCount}</span>
-              <span className="stat-change positive"><FiTrendingUp /> +2 new</span>
+            <div className="stat-icon-wrapper">
+              {card.icon}
             </div>
-            <span className="stat-desc">Active professors & advisors</span>
           </div>
-          <div className="stat-icon-wrapper">
-            <FiUsers />
-          </div>
-        </div>
-
-        <div className="premium-stat-card" style={{ '--stat-color': 'hsl(142, 72%, 29%)', '--stat-glow-color': 'rgba(16, 185, 129, 0.12)' }}>
-          <div className="stat-details">
-            <span className="stat-label">Active Courses</span>
-            <div className="stat-value-container">
-              <span className="stat-val">{displayStats.coursesCount}</span>
-              <span className="stat-change info-badge">6 Depts</span>
-            </div>
-            <span className="stat-desc">Across all semesters</span>
-          </div>
-          <div className="stat-icon-wrapper">
-            <FiBookOpen />
-          </div>
-        </div>
-
-        <div className="premium-stat-card" style={{ '--stat-color': 'hsl(38, 92%, 50%)', '--stat-glow-color': 'rgba(245, 158, 11, 0.12)' }}>
-          <div className="stat-details">
-            <span className="stat-label">Unpaid Fees Invoices</span>
-            <div className="stat-value-container">
-              <span className="stat-val">{displayStats.unpaidFeesInvoices}</span>
-              <span className="stat-change negative"><FiTrendingDown /> Pending</span>
-            </div>
-            <span className="stat-desc">Fee reports outstanding</span>
-          </div>
-          <div className="stat-icon-wrapper">
-            <FiDollarSign />
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Collapsible Secondary Metrics Panel */}
@@ -339,44 +515,25 @@ export const Dashboard = () => {
 
       {showSecondaryStats && (
         <div className="secondary-stats-grid">
-          <Link to="/library" className="premium-stat-card animate-fade-in" style={{ '--stat-color': 'hsl(199, 89%, 48%)', '--stat-glow-color': 'rgba(56, 189, 248, 0.12)' }}>
-            <div className="stat-details">
-              <span className="stat-label">Library Inventory</span>
-              <div className="stat-value-container">
-                <span className="stat-val">{displayStats.libraryBooks}</span>
+          {getSecondaryStats().map((secStat, idx) => (
+            <Link 
+              key={idx} 
+              to={secStat.link} 
+              className="premium-stat-card animate-fade-in" 
+              style={{ '--stat-color': secStat.color, '--stat-glow-color': secStat.glow }}
+            >
+              <div className="stat-details">
+                <span className="stat-label">{secStat.label}</span>
+                <div className="stat-value-container">
+                  <span className="stat-val">{secStat.val}</span>
+                </div>
+                <span className="stat-desc">{secStat.desc}</span>
               </div>
-              <span className="stat-desc">Total reference books</span>
-            </div>
-            <div className="stat-icon-wrapper">
-              <FiBook />
-            </div>
-          </Link>
-
-          <Link to="/hostels" className="premium-stat-card animate-fade-in" style={{ '--stat-color': 'hsl(350, 89%, 60%)', '--stat-glow-color': 'rgba(244, 63, 94, 0.12)' }}>
-            <div className="stat-details">
-              <span className="stat-label">Hostel Allocations</span>
-              <div className="stat-value-container">
-                <span className="stat-val">{displayStats.hostelRooms}</span>
+              <div className="stat-icon-wrapper">
+                {secStat.icon}
               </div>
-              <span className="stat-desc">Rooms currently allocated</span>
-            </div>
-            <div className="stat-icon-wrapper">
-              <FiHome />
-            </div>
-          </Link>
-
-          <Link to="/transport" className="premium-stat-card animate-fade-in" style={{ '--stat-color': 'hsl(271, 91%, 65%)', '--stat-glow-color': 'rgba(168, 85, 247, 0.12)' }}>
-            <div className="stat-details">
-              <span className="stat-label">Transport Routes</span>
-              <div className="stat-value-container">
-                <span className="stat-val">{displayStats.transportRoutes}</span>
-              </div>
-              <span className="stat-desc">Active shuttle buses</span>
-            </div>
-            <div className="stat-icon-wrapper">
-              <FiMapPin />
-            </div>
-          </Link>
+            </Link>
+          ))}
         </div>
       )}
 
@@ -426,8 +583,8 @@ export const Dashboard = () => {
                       </td>
                       <td>
                         <span className={`badge ${fee.feeStatus === 'Paid' ? 'badge-success' :
-                            fee.feeStatus === 'Partial' ? 'badge-warning' :
-                              'badge-danger'
+                          fee.feeStatus === 'Partial' ? 'badge-warning' :
+                            'badge-danger'
                           }`}>
                           {fee.feeStatus === 'Paid' ? '✓ Paid' :
                             fee.feeStatus === 'Partial' ? '◐ Partial' :
@@ -535,7 +692,7 @@ export const Dashboard = () => {
                   </p>
                   <div className="notice-footer-meta">
                     <span className={`badge ${notice.category === 'Academic' ? 'badge-info' :
-                        notice.category === 'Events' ? 'badge-success' : 'badge-warning'
+                      notice.category === 'Events' ? 'badge-success' : 'badge-warning'
                       }`}>
                       {notice.category || 'General'}
                     </span>

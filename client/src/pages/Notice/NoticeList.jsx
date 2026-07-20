@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchNotices } from '../../redux/slices/noticeSlice.js';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
+import SearchBar from '../../components/common/SearchBar.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Button from '../../components/common/Button.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -16,10 +17,17 @@ export const NoticeList = () => {
   const dispatch = useDispatch();
   const { list, loading } = useSelector((state) => state.notices);
   const { role } = useAuth();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     dispatch(fetchNotices());
   }, [dispatch]);
+
+  const filteredNotices = list.filter((notice) => {
+    const term = search.toLowerCase();
+    const title = (notice.title || '').toLowerCase();
+    return title.includes(term);
+  });
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this announcement?')) return;
@@ -46,12 +54,21 @@ export const NoticeList = () => {
         }
       />
 
+
+      <div className="flex justify-between items-center mb-4 flex-responsive">
+        <SearchBar
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by notice title..."
+        />
+      </div>
+
       {loading ? (
         <Loader />
       ) : (
         <Table
           headers={['Notice Title', 'Date Posted', 'Actions']}
-          data={list}
+          data={filteredNotices}
           renderRow={(notice) => (
             <tr key={notice._id || notice.id}>
               <td style={{ fontWeight: 600 }}>{notice.title}</td>

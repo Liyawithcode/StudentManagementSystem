@@ -2,8 +2,8 @@ import { apiCall } from '../redux/api/apiSlice.js';
 import { API_ENDPOINTS } from '../config/api.js';
 
 export const authService = {
-  login: async (email, password) => {
-    return apiCall('post', API_ENDPOINTS.AUTH.LOGIN, { email, password });
+  login: async (email, password, role) => {
+    return apiCall('post', API_ENDPOINTS.AUTH.LOGIN, { email, password, role });
   },
   
   registerAdmin: async (adminData) => {

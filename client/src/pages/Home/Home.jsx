@@ -1,12 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiSun, FiMoon } from 'react-icons/fi';
+import { dashboardService } from '../../services/dashboardService.js';
 import './Home.css';
 
 export const Home = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [stats, setStats] = useState({
+    students: '10,000+',
+    faculty: '500+',
+    courses: '200+',
+    successRate: '98%'
+  });
+
+  useEffect(() => {
+    const fetchPublicStats = async () => {
+      try {
+        const response = await dashboardService.getPublicStats();
+        if (response?.success && response?.stats) {
+          setStats({
+            students: response.stats.students.toLocaleString() + (response.stats.students > 0 ? '+' : ''),
+            faculty: response.stats.faculty.toLocaleString() + (response.stats.faculty > 0 ? '+' : ''),
+            courses: response.stats.courses.toLocaleString() + (response.stats.courses > 0 ? '+' : ''),
+            successRate: response.stats.successRate
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch public stats:', err);
+      }
+    };
+    fetchPublicStats();
+  }, []);
 
   useEffect(() => {
     const isDark = document.body.classList.contains('dark-theme');
@@ -417,7 +443,7 @@ export const Home = () => {
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-user-graduate"></i>
             </div>
-            <div className="stat-number">10,000+</div>
+            <div className="stat-number">{stats.students}</div>
             <div className="stat-label">Students Enrolled</div>
           </div>
 
@@ -425,7 +451,7 @@ export const Home = () => {
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-chalkboard-user"></i>
             </div>
-            <div className="stat-number">500+</div>
+            <div className="stat-number">{stats.faculty}</div>
             <div className="stat-label">Expert Faculty</div>
           </div>
 
@@ -433,7 +459,7 @@ export const Home = () => {
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-book-atlas"></i>
             </div>
-            <div className="stat-number">200+</div>
+            <div className="stat-number">{stats.courses}</div>
             <div className="stat-label">Modern Courses</div>
           </div>
 
@@ -441,7 +467,7 @@ export const Home = () => {
             <div className="stat-icon-wrapper">
               <i className="fa-solid fa-chart-line"></i>
             </div>
-            <div className="stat-number">98%</div>
+            <div className="stat-number">{stats.successRate}</div>
             <div className="stat-label">Success Rate</div>
           </div>
         </div>

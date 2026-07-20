@@ -1,39 +1,64 @@
-import { Fee } from "../model/fee.model.js";
+import { FeeStructure } from "../model/feeStructure.model.js";
+import { Payment } from "../model/payment.model.js";
+import { Student } from "../model/student.model.js";
 
-// Create Fee Record
+// Create Fee Structure and automatically assign it to matching students
 export const createFee = async (req, res) => {
   try {
-    const { studentId, courseId, feeAmount, feeType, dueDate, paymentMethod, feeStatus } = req.body;
+    const { class: className, semester, academicYear, feeCategory, amount, dueDate, lateFine, description } = req.body;
 
-    if (!studentId || !courseId || feeAmount === undefined || !feeType || !dueDate) {
+    if (!className || !semester || !academicYear || !feeCategory || amount === undefined || !dueDate) {
       return res.status(400).json({
         success: false,
-        message: "Please fill all required fields: studentId, courseId, feeAmount, feeType, dueDate",
+        message: "Please fill all required fields: class, semester, academicYear, feeCategory, amount, dueDate",
       });
     }
 
-    const validFeeTypes = ["Admission", "Examination", "Hostel", "Library", "Other"];
-    if (!validFeeTypes.includes(feeType)) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid feeType. Must be one of: ${validFeeTypes.join(", ")}`,
-      });
-    }
-
-    const fee = await Fee.create({
-      studentId,
-      courseId,
-      feeAmount,
-      feeType,
-      feeStatus: feeStatus || "pending",
+    const feeStructure = await FeeStructure.create({
+      class: className,
+      semester,
+      academicYear,
+      feeCategory,
+      amount,
       dueDate,
-      paymentMethod: paymentMethod || "CASH",
+      lateFine: lateFine || 0,
+      description: description || "",
     });
+
+    // Automatically find students in the same class and semester
+    const matchingStudents = await Student.find({
+      class: className,
+      semester: semester,
+      enrollmentStatus: "Active",
+    });
+
+    // Create a pending payment ledger for each matching student
+    const paymentRecords = matchingStudents.map((student) => {
+      return {
+        studentId: student.studentId,
+        enrollmentNumber: student.studentId,
+        studentName: `${student.firstName} ${student.lastName}`,
+        class: className,
+        semester: semester,
+        feeCategory,
+        totalAmount: amount,
+        paidAmount: 0,
+        dueAmount: amount,
+        paymentStatus: "Pending",
+        remarks: description || "",
+        createdBy: req.user?._id,
+      };
+    });
+
+    if (paymentRecords.length > 0) {
+      await Payment.insertMany(paymentRecords);
+    }
 
     res.status(201).json({
       success: true,
-      message: "Fee record created successfully",
-      fee,
+      message: `Fee structure created successfully and assigned to ${matchingStudents.length} student(s).`,
+      feeStructure,
+      assignedStudentsCount: matchingStudents.length,
     });
   } catch (error) {
     res.status(500).json({
@@ -43,15 +68,15 @@ export const createFee = async (req, res) => {
   }
 };
 
-// Get All Fee Records
+// Get All Fee Structures
 export const getAllFees = async (req, res) => {
   try {
-    const fees = await Fee.find();
+    const feeStructures = await FeeStructure.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      count: fees.length,
-      fees,
+      count: feeStructures.length,
+      fees: feeStructures, // key as 'fees' to support existing client bindings if any
     });
   } catch (error) {
     res.status(500).json({
@@ -61,81 +86,63 @@ export const getAllFees = async (req, res) => {
   }
 };
 
-// Get Fee Records by Student ID
-export const getFeesByStudent = async (req, res) => {
+// Update Fee Structure
+export const updateFee = async (req, res) => {
   try {
-    let studentId = req.params.studentId || req.query.studentId;
+    const { id } = req.params;
+    const { class: className, semester, academicYear, feeCategory, amount, dueDate, lateFine, description } = req.body;
 
-    // Allow 'me' as a shortcut for the logged-in user's own ID
-    if (studentId === 'me' && req.user) {
-      studentId = req.user._id.toString();
-    }
-
-    if (!studentId) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide student ID",
-      });
-    }
-
-    // Search by the studentId field value — could be MongoDB ObjectId or custom ID
-    const fees = await Fee.find({
-      studentId: studentId,
-    }).sort({ dueDate: -1 });
-
-    res.status(200).json({
-      success: true,
-      count: fees.length,
-      fees,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// Update Payment Status
-export const updatePayment = async (req, res) => {
-  try {
-    const id = req.params.id || req.body.feeId;
-    const { feeStatus, paymentMethod } = req.body;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Fee ID is required",
-      });
-    }
-
-    if (!feeStatus || !["Paid", "pending", "Partial"].includes(feeStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid feeStatus ('Paid', 'pending', 'Partial')",
-      });
-    }
-
-    const updateData = { feeStatus };
-    if (paymentMethod) updateData.paymentMethod = paymentMethod;
-
-    const fee = await Fee.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
-
-    if (!fee) {
+    const feeStructure = await FeeStructure.findById(id);
+    if (!feeStructure) {
       return res.status(404).json({
         success: false,
-        message: "Fee record not found",
+        message: "Fee structure not found",
       });
+    }
+
+    // Capture old values to update matching pending payments
+    const oldClass = feeStructure.class;
+    const oldSemester = feeStructure.semester;
+    const oldCategory = feeStructure.feeCategory;
+
+    // Update fee structure
+    feeStructure.class = className || feeStructure.class;
+    feeStructure.semester = semester || feeStructure.semester;
+    feeStructure.academicYear = academicYear || feeStructure.academicYear;
+    feeStructure.feeCategory = feeCategory || feeStructure.feeCategory;
+    feeStructure.amount = amount !== undefined ? amount : feeStructure.amount;
+    feeStructure.dueDate = dueDate || feeStructure.dueDate;
+    feeStructure.lateFine = lateFine !== undefined ? lateFine : feeStructure.lateFine;
+    feeStructure.description = description || feeStructure.description;
+
+    await feeStructure.save();
+
+    // If amount or details changed, update all corresponding "Pending" payments for students
+    if (amount !== undefined || className || semester || feeCategory) {
+      await Payment.updateMany(
+        {
+          class: oldClass,
+          semester: oldSemester,
+          feeCategory: oldCategory,
+          paymentStatus: "Pending",
+        },
+        {
+          $set: {
+            class: feeStructure.class,
+            semester: feeStructure.semester,
+            feeCategory: feeStructure.feeCategory,
+            totalAmount: feeStructure.amount,
+            dueAmount: feeStructure.amount,
+            remarks: feeStructure.description,
+          },
+        }
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: "Payment updated successfully",
-      fee,
+      message: "Fee structure updated successfully",
+      feeStructure,
     });
   } catch (error) {
     res.status(500).json({
@@ -145,28 +152,70 @@ export const updatePayment = async (req, res) => {
   }
 };
 
-// Delete Fee Record
+// Delete Fee Structure and optionally cleanup pending payments
 export const deleteFee = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const fee = await Fee.findByIdAndDelete(id);
-
-    if (!fee) {
+    const feeStructure = await FeeStructure.findByIdAndDelete(id);
+    if (!feeStructure) {
       return res.status(404).json({
         success: false,
-        message: "Fee record not found",
+        message: "Fee structure not found",
       });
     }
 
+    // Delete corresponding "Pending" payments for students
+    await Payment.deleteMany({
+      class: feeStructure.class,
+      semester: feeStructure.semester,
+      feeCategory: feeStructure.feeCategory,
+      paymentStatus: "Pending",
+    });
+
     res.status(200).json({
       success: true,
-      message: "Fee record deleted successfully",
+      message: "Fee structure and pending student ledgers deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
     });
+  }
+};
+
+// Maintain compatibility with legacy controllers if they are referenced elsewhere
+export const getFeesByStudent = async (req, res) => {
+  try {
+    const studentId = req.params.studentId || req.query.studentId;
+    const payments = await Payment.find({ studentId }).sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      count: payments.length,
+      fees: payments,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updatePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { feeStatus, paymentMethod } = req.body;
+    const payment = await Payment.findById(id);
+    if (!payment) return res.status(404).json({ success: false, message: "Payment not found" });
+
+    payment.paymentStatus = feeStatus;
+    if (paymentMethod) payment.paymentMethod = paymentMethod;
+    if (feeStatus === "Paid") {
+      payment.paidAmount = payment.totalAmount;
+      payment.dueAmount = 0;
+    }
+    await payment.save();
+    res.status(200).json({ success: true, fee: payment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

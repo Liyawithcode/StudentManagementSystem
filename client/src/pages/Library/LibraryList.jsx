@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header.jsx';
 import Table from '../../components/common/Table.jsx';
+import SearchBar from '../../components/common/SearchBar.jsx';
 import Button from '../../components/common/Button.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Modal from '../../components/common/Modal.jsx';
@@ -17,6 +18,7 @@ export const LibraryList = () => {
   const [books, setBooks] = useState([]);
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   
   const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' or 'issues'
   const [showAddModal, setShowAddModal] = useState(false);
@@ -146,6 +148,21 @@ export const LibraryList = () => {
     }
   };
 
+  const filteredBooks = books.filter((book) => {
+    const term = search.toLowerCase();
+    const title = (book.title || '').toLowerCase();
+    const author = (book.author || '').toLowerCase();
+    const isbn = (book.isbn || '').toLowerCase();
+    return title.includes(term) || author.includes(term) || isbn.includes(term);
+  });
+
+  const filteredIssues = issues.filter((issue) => {
+    const term = search.toLowerCase();
+    const title = (issue.bookId?.title || '').toLowerCase();
+    const student = (issue.studentId || '').toLowerCase();
+    return title.includes(term) || student.includes(term);
+  });
+
   if (loading) return <Loader />;
 
   return (
@@ -185,11 +202,19 @@ export const LibraryList = () => {
         </button>
       </div>
 
+      <div className="flex justify-between items-center mt-4 mb-2 flex-responsive">
+        <SearchBar
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={activeTab === 'catalog' ? "Search books by title, author, or ISBN..." : "Search borrow logs by book title or student ID..."}
+        />
+      </div>
+
       {activeTab === 'catalog' ? (
         <div className="card mt-4">
           <Table
             headers={['Title', 'Author', 'ISBN', 'Total Qty', 'Available Qty', 'Actions']}
-            data={books}
+            data={filteredBooks}
             renderRow={(book) => (
               <tr key={book._id}>
                 <td style={{ fontWeight: 600 }}>{book.title}</td>
@@ -217,7 +242,7 @@ export const LibraryList = () => {
         <div className="card mt-4">
           <Table
             headers={['Book Title', 'Student ID', 'Due Date', 'Status', 'Fines', 'Actions']}
-            data={role === 'student' ? issues.filter(i => i.studentId === user?.studentId) : issues}
+            data={role === 'student' ? filteredIssues.filter(i => i.studentId === user?.studentId) : filteredIssues}
             renderRow={(issue) => (
               <tr key={issue._id}>
                 <td style={{ fontWeight: 600 }}>{issue.bookId?.title || 'Unknown Book'}</td>

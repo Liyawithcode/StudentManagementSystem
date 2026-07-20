@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService.js';
 import { getLocalStorage, setLocalStorage, removeLocalStorage } from '../../utils/localStorage.js';
 
-export const loginUser = createAsyncThunk('auth/login', async ({ email, password }, thunkAPI) => {
+export const loginUser = createAsyncThunk('auth/login', async ({ email, password, role }, thunkAPI) => {
   try {
-    const data = await authService.login(email, password);
+    const data = await authService.login(email, password, role);
     return data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);

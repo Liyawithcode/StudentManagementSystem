@@ -5,5 +5,8 @@ export const dashboardService = {
   getStats: async () => {
     return apiCall('get', API_ENDPOINTS.DASHBOARD.STATS);
   },
+  getPublicStats: async () => {
+    return apiCall('get', '/dashboard/public');
+  },
 };
 export default dashboardService;

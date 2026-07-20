@@ -26,6 +26,8 @@ import { dashboardRouter } from "./routes/dashboard.routes.js";
 import { settingsRouter } from "./routes/settings.routes.js";
 import { documentRouter } from "./routes/document.routes.js";
 import { facilityRouter } from "./routes/facility.routes.js";
+import { paymentRouter } from "./routes/payment.routes.js";
+import { receiptRouter } from "./routes/receipt.routes.js";
 
 export const app = express();
 
@@ -37,6 +39,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/public", express.static("public"));
 if (config_ENV.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
@@ -62,6 +65,8 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/documents", documentRouter);
 app.use("/api/facilities", facilityRouter);
+app.use("/api/payments", paymentRouter);
+app.use("/api/receipt", receiptRouter);
 
 // Alias to support direct registration routes
 app.use("/", authRouter);
