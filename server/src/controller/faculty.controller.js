@@ -238,9 +238,16 @@ export const updateFaculty = async (req, res) => {
       });
     }
 
-    const { email, password, role, isVerified, ...updateData } = req.body;
+    const { email, password, role, isVerified, facultyfullname, ...updateData } = req.body;
+
+    if (facultyfullname) {
+      const parts = facultyfullname.trim().split(/\s+/);
+      updateData.firstName = parts[0] || "Faculty";
+      updateData.lastName = parts.slice(1).join(" ") || "Member";
+    }
 
     const faculty = await teacherService.updateFaculty(facultyId, updateData);
+
 
     if (!faculty) {
       return res.status(404).json({

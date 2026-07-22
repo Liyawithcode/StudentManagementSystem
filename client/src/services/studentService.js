@@ -7,14 +7,17 @@ export const studentService = {
   },
 
   getStudentById: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') return { student: null };
     return apiCall('get', `${API_ENDPOINTS.STUDENTS.BASE}/${id}`);
   },
 
   updateStudent: async (id, data) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid student ID');
     return apiCall('put', `${API_ENDPOINTS.STUDENTS.BASE}/${id}`, data);
   },
 
   deleteStudent: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid student ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.STUDENTS.BASE}/${id}`);
   },
 
@@ -27,6 +30,7 @@ export const studentService = {
   },
 
   getEnrollmentHistory: async (studentId) => {
+    if (!studentId || studentId === 'null' || studentId === 'undefined') return { history: [] };
     return apiCall('get', API_ENDPOINTS.STUDENTS.ENROLLMENT_HISTORY(studentId));
   },
 
@@ -35,6 +39,8 @@ export const studentService = {
   },
 
   getLeaveRequests: async (studentId) => {
+    if (!studentId || studentId === 'null' || studentId === 'undefined') return { requests: [] };
     return apiCall('get', API_ENDPOINTS.STUDENTS.LEAVE_HISTORY(studentId));
   },
+
 };

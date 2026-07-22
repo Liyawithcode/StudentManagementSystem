@@ -25,6 +25,7 @@ export const StudentList = () => {
   }, [dispatch]);
 
   const handleDelete = async () => {
+    if (!deleteId) return;
     try {
       await studentService.deleteStudent(deleteId);
       toast.success('Student deleted successfully');
@@ -75,43 +76,48 @@ export const StudentList = () => {
         <Table
           headers={['ID', 'Name', 'Email', 'Class', 'Gender', 'Actions']}
           data={filtered}
-          renderRow={(student) => (
-            <tr key={student._id || student.studentId}>
-              <td>{student.studentId || 'N/A'}</td>
-              <td style={{ fontWeight: 500 }}>
-                {student.firstName} {student.lastName}
-              </td>
-              <td>{student.email}</td>
-              <td>{student.className || 'Unassigned'}</td>
-              <td>{student.gender || 'N/A'}</td>
-              <td className="flex gap-2">
-                <Link to={`/students/profile/${student._id}`} title="Profile">
-                  <Button variant="secondary" style={{ padding: '0.4rem' }}>
-                    <FiEye />
-                  </Button>
-                </Link>
-                {role === 'admin' && (
-                  <>
-                    <Link to={`/students/edit/${student._id}`} title="Edit">
-                      <Button variant="secondary" style={{ padding: '0.4rem' }}>
-                        <FiEdit />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="danger"
-                      style={{ padding: '0.4rem' }}
-                      onClick={() => setDeleteId(student._id)}
-                      title="Delete"
-                    >
-                      <FiTrash />
+          renderRow={(student) => {
+            const sid = student._id || student.id || student.studentId;
+            return (
+              <tr key={sid}>
+                <td>{student.studentId || 'N/A'}</td>
+                <td style={{ fontWeight: 500 }}>
+                  {student.firstName} {student.lastName}
+                </td>
+                <td>{student.email}</td>
+                <td><span className="badge badge-secondary">{student.class || student.className || student.department || 'Class 10'}</span></td>
+
+                <td>{student.gender || 'N/A'}</td>
+                <td className="flex gap-2">
+                  <Link to={`/students/profile/${sid}`} title="Profile">
+                    <Button variant="secondary" style={{ padding: '0.4rem' }}>
+                      <FiEye />
                     </Button>
-                  </>
-                )}
-              </td>
-            </tr>
-          )}
+                  </Link>
+                  {role === 'admin' && (
+                    <>
+                      <Link to={`/students/edit/${sid}`} title="Edit">
+                        <Button variant="secondary" style={{ padding: '0.4rem' }}>
+                          <FiEdit />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="danger"
+                        style={{ padding: '0.4rem' }}
+                        onClick={() => setDeleteId(sid)}
+                        title="Delete"
+                      >
+                        <FiTrash />
+                      </Button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          }}
         />
       )}
+
 
       <ConfirmDialog
         isOpen={!!deleteId}

@@ -18,7 +18,8 @@ import {
   HiCheckCircle,
   HiOutlineChartBar,
   HiOutlineBookOpen,
-  HiOutlineClipboardList
+  HiOutlineClipboardList,
+  HiOutlineHome
 } from 'react-icons/hi';
 import './auth.css';
 
@@ -116,7 +117,7 @@ export const Login = () => {
     setLoading(true);
     setLoadingText('Verifying your identity…');
 
-    // Display 'Check your phone' helper text if login takes more than 4 seconds
+    // Display helper text if login takes time
     const phonePromptTimer = setTimeout(() => {
       setLoadingText("Check your phone to confirm it's you.");
     }, 4000);
@@ -129,15 +130,14 @@ export const Login = () => {
       const additionalInfo = getAdditionalUserInfo(result);
       const isNewUser = additionalInfo?.isNewUser;
 
-      // Complete backend login directly (which will generate the OTP and request verify-otp)
       await completeBackendLogin(user, isNewUser);
     } catch (err) {
       clearTimeout(phonePromptTimer);
-      console.error('Google Sign-In failed:', err);
+      console.warn('Firebase Google Sign-In failed or popup was closed:', err);
 
-      // Fallback to Mock Google login for local development if Google API/popup fails
+      // In development mode, automatically fallback to mock login if Firebase Google Auth is unconfigured or fails
       if (import.meta.env.DEV) {
-        toast.info('Google Sign-In failed. Falling back to developer mock login...');
+        toast.info('Google Auth unconfigured or failed in Firebase. Using Developer Mock Login...');
         const mockUser = {
           uid: 'mock_google_uid',
           displayName: `Mock Google ${role.charAt(0).toUpperCase() + role.slice(1)}`,
@@ -150,15 +150,15 @@ export const Login = () => {
         return;
       }
 
-      // Detailed error handling as requested
+      // Detailed error handling for production
       if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        toast.error('Google Sign-In was cancelled.');
+        toast.error('Google Sign-In was cancelled or popup closed.');
       } else if (err.code === 'auth/network-request-failed') {
         toast.error('Network error: Please check your internet connection.');
       } else if (err.code === 'auth/unauthorized-domain') {
-        toast.error('Unauthorized domain: This domain is not configured for Google Sign-In.');
+        toast.error('Unauthorized domain: This domain is not configured in Firebase Console.');
       } else if (err.code === 'auth/invalid-oauth-client-id') {
-        toast.error('OAuth Client ID error: Please verify your Firebase project setup.');
+        toast.error('OAuth Client ID error: Please enable Google Provider in Firebase Console.');
       } else {
         toast.error(err.message || 'Firebase authentication error.');
       }
@@ -228,6 +228,14 @@ export const Login = () => {
         <div className="blob blob-2"></div>
 
         <div className="login-form-container">
+          {/* Back to Homepage Button */}
+          <div className="back-home-wrapper">
+            <Link to="/" className="back-home-btn">
+              <HiOutlineHome />
+              <span>Back to Homepage</span>
+            </Link>
+          </div>
+
           {/* Header branding visible only on Mobile/Tablet */}
           <div className="login-header-logo">
             <div className="brand-logo">I</div>

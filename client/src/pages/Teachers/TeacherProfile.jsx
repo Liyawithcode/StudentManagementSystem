@@ -7,14 +7,18 @@ import Table from '../../components/common/Table.jsx';
 import { teacherService } from '../../services/teacherService.js';
 import { toast } from '../../utils/toast.js';
 import { formatDate } from '../../utils/dateFormatter.js';
-import { FiArrowLeft, FiEdit, FiUser } from 'react-icons/fi';
+import { useAuth } from '../../hooks/useAuth.js';
+import { FiArrowLeft, FiEdit, FiUser, FiTrash } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const TeacherProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [teacher, setTeacher] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -36,13 +40,36 @@ export const TeacherProfile = () => {
     loadProfile();
   }, [id, navigate]);
 
+  const handleDelete = async () => {
+    try {
+      await teacherService.deleteTeacher(teacher._id);
+      toast.success('Faculty member deleted successfully');
+      navigate('/teachers');
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete faculty member');
+    }
+  };
+
+  const getTeacherName = (t) => {
+    if (!t) return 'N/A';
+    if (t.facultyfullname) return t.facultyfullname;
+    if (t.firstName || t.lastName) {
+      return `${t.firstName || ''} ${t.lastName || ''}`.trim();
+    }
+    if (t.name) return t.name;
+    if (t.fullName) return t.fullName;
+    return 'N/A';
+  };
+
   if (loading) return <Loader />;
   if (!teacher) return <div className="text-center mt-8">Teacher profile not found</div>;
+
+  const teacherName = getTeacherName(teacher);
 
   return (
     <div>
       <Header
-        title={teacher.facultyfullname || teacher.name}
+        title={teacherName}
         subtitle={`Faculty Profile - ID: ${teacher.facultyId || 'N/A'}`}
         actions={
           <div className="flex gap-2">
@@ -51,14 +78,22 @@ export const TeacherProfile = () => {
                 <FiArrowLeft /> Back to List
               </Button>
             </Link>
-            <Link to={`/teachers/edit/${teacher._id}`}>
-              <Button variant="primary">
-                <FiEdit /> Edit Profile
-              </Button>
-            </Link>
+            {role === 'admin' && (
+              <>
+                <Link to={`/teachers/edit/${teacher._id}`}>
+                  <Button variant="primary">
+                    <FiEdit /> Edit Profile
+                  </Button>
+                </Link>
+                <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+                  <FiTrash /> Delete Profile
+                </Button>
+              </>
+            )}
           </div>
         }
       />
+
 
       <div className="grid gap-6 mt-4" style={{ gridTemplateColumns: '1fr 2fr' }}>
         {/* Left Avatar Card */}
@@ -80,8 +115,9 @@ export const TeacherProfile = () => {
             <FiUser />
           </div>
           <h3 style={{ fontFamily: 'Outfit', fontWeight: 600 }}>
-            {teacher.facultyfullname || teacher.name}
+            {teacherName}
           </h3>
+
           <span className="badge badge-success mt-2">Active Instructor</span>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '1rem' }}>
             Department: {teacher.department || 'General Academics'}
@@ -132,8 +168,16 @@ export const TeacherProfile = () => {
           />
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to remove this faculty record? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default TeacherProfile;
+

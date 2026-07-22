@@ -1,6 +1,6 @@
 import express from "express";
 import { getHostelSummary, getRooms } from "../controller/hostel.controller.js";
-import { createRoom, allocateRoom, vacateRoom } from "../controller/room.controller.js";
+import { createRoom, allocateRoom, vacateRoom, deleteRoom } from "../controller/room.controller.js";
 import { protect, restrictTo } from "../middleware/auth.middleware.js";
 
 export const hostelRouter = express.Router();
@@ -15,3 +15,5 @@ hostelRouter.get("/rooms", getRooms);
 hostelRouter.post("/rooms", restrictTo("admin"), createRoom);
 hostelRouter.post("/rooms/allocate/:id", restrictTo("admin"), allocateRoom);
 hostelRouter.post("/rooms/vacate/:id", restrictTo("admin"), vacateRoom);
+hostelRouter.delete("/rooms/:id", restrictTo("admin"), deleteRoom);
+

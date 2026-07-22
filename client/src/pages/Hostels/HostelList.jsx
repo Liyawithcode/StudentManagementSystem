@@ -9,7 +9,8 @@ import Input from '../../components/common/Input.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { hostelService } from '../../services/hostelService.js';
 import { toast } from '../../utils/toast.js';
-import { FiHome, FiPlus, FiUserPlus, FiUserMinus } from 'react-icons/fi';
+import { FiHome, FiPlus, FiUserPlus, FiUserMinus, FiTrash2 } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const HostelList = () => {
   const { role, user } = useAuth();
@@ -20,6 +21,8 @@ export const HostelList = () => {
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
+  const [deleteRoomId, setDeleteRoomId] = useState(null);
+
   
   // Forms state
   const [newRoom, setNewRoom] = useState({ roomNumber: '', block: 'Block A', type: 'Shared' });
@@ -92,7 +95,27 @@ export const HostelList = () => {
     }
   };
 
+  const handleDeleteRoom = async () => {
+    if (!deleteRoomId) return;
+    try {
+      const res = await hostelService.deleteRoom(deleteRoomId);
+
+      if (res.success) {
+        toast.success('Room deleted successfully');
+        setRooms(rooms.filter(r => r._id !== deleteRoomId));
+        setDeleteRoomId(null);
+        
+        // Refresh summary
+        const summaryRes = await hostelService.getHostelSummary();
+        setSummary(summaryRes.summary);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete room');
+    }
+  };
+
   const handleVacateRoom = async (roomId) => {
+
     if (!window.confirm('Vacate this hostel room?')) return;
     try {
       const res = await hostelService.vacateRoom(roomId);
@@ -204,10 +227,13 @@ export const HostelList = () => {
                         <FiUserPlus /> Allocate
                       </Button>
                     ) : (
-                      <Button variant="danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleVacateRoom(room._id)}>
+                      <Button variant="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleVacateRoom(room._id)}>
                         <FiUserMinus /> Vacate
                       </Button>
                     )}
+                    <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => setDeleteRoomId(room._id)} title="Delete Room">
+                      <FiTrash2 />
+                    </Button>
                   </div>
                 )}
               </td>
@@ -269,8 +295,16 @@ export const HostelList = () => {
           <Button type="submit" variant="primary">Assign Room</Button>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!deleteRoomId}
+        onClose={() => setDeleteRoomId(null)}
+        onConfirm={handleDeleteRoom}
+        message="Are you sure you want to delete this hostel room? This cannot be undone."
+      />
     </div>
   );
 };
 
 export default HostelList;
+

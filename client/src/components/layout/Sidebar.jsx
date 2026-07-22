@@ -1,15 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
-import { 
-  FiGrid, FiUsers, FiBookOpen, FiBook, FiCheckSquare, 
+import {
+  FiGrid, FiUsers, FiBookOpen, FiBook, FiCheckSquare,
   FiClock, FiDollarSign, FiBell, FiSettings, FiActivity, FiLogOut, FiCalendar,
-  FiHome, FiMapPin
+  FiHome, FiMapPin, FiMenu
 } from 'react-icons/fi';
 import './layout.css';
 
-export const Sidebar = ({ collapsed }) => {
+export const Sidebar = ({ collapsed, toggleSidebar, onNavClick }) => {
   const { user, role, logout } = useAuth();
+
+  const handleLinkClick = () => {
+    if (onNavClick) onNavClick();
+  };
 
   const getLinks = () => {
     const common = [{ to: '/dashboard', label: 'Dashboard', icon: <FiGrid /> }];
@@ -70,9 +74,14 @@ export const Sidebar = ({ collapsed }) => {
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      <div className="sidebar-brand flex items-center gap-2">
-        <FiBookOpen className="brand-logo" />
-        {!collapsed && <span className="brand-name">IntelliCampus</span>}
+      <div className="sidebar-brand flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <FiBookOpen className="brand-logo" />
+          {!collapsed && <span className="brand-name">IntelliCampus</span>}
+        </div>
+        <button className="sidebar-close-btn" onClick={toggleSidebar} title="Toggle Sidebar">
+          <FiMenu />
+        </button>
       </div>
 
       <nav className="sidebar-nav">

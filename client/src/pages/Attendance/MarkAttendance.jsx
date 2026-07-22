@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header.jsx';
 import Button from '../../components/common/Button.jsx';
 import Dropdown from '../../components/common/Dropdown.jsx';
@@ -10,6 +11,7 @@ import { courseService } from '../../services/courseService.js';
 import { toast } from '../../utils/toast.js';
 
 export const MarkAttendance = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -21,7 +23,11 @@ export const MarkAttendance = () => {
     const loadCoursesAndStudents = async () => {
       try {
         const cRes = await courseService.getAllCourses();
-        setCourses(cRes.courses || cRes || []);
+        const crs = cRes.courses || cRes || [];
+        setCourses(crs);
+        if (crs.length > 0) {
+          setSelectedCourse(crs[0]._id || crs[0].id || crs[0].courseCode);
+        }
         
         const sRes = await studentService.getAllStudents();
         const stds = sRes.students || sRes || [];
@@ -30,7 +36,8 @@ export const MarkAttendance = () => {
         // Initialize records: everyone is Present by default
         const recs = {};
         stds.forEach((s) => {
-          recs[s._id] = 'Present';
+          const sid = s._id || s.id || s.studentId;
+          recs[sid] = 'Present';
         });
         setRecords(recs);
       } catch (err) {
@@ -40,8 +47,8 @@ export const MarkAttendance = () => {
     loadCoursesAndStudents();
   }, []);
 
-  const handleStatusChange = (studentId, status) => {
-    setRecords({ ...records, [studentId]: status });
+  const handleStatusChange = (sid, status) => {
+    setRecords((prev) => ({ ...prev, [sid]: status }));
   };
 
   const handleSubmit = async (e) => {
@@ -51,10 +58,13 @@ export const MarkAttendance = () => {
     }
     setLoading(true);
     try {
-      const attendanceData = students.map((s) => ({
-        studentId: s._id,
-        status: records[s._id] || 'Present',
-      }));
+      const attendanceData = students.map((s) => {
+        const sid = s._id || s.id || s.studentId;
+        return {
+          studentId: s.studentId || sid,
+          status: records[sid] || 'Present',
+        };
+      });
 
       await attendanceService.recordAttendance({
         courseId: selectedCourse,
@@ -63,6 +73,7 @@ export const MarkAttendance = () => {
       });
 
       toast.success('Attendance recorded successfully!');
+      navigate('/attendance');
     } catch (err) {
       toast.error(err.message || 'Failed to submit attendance');
     } finally {
@@ -80,7 +91,10 @@ export const MarkAttendance = () => {
             label="Course / Class"
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
-            options={courses.map((c) => ({ value: c._id, label: c.courseName || c.name }))}
+            options={courses.map((c) => ({
+              value: c._id || c.id || c.courseCode,
+              label: `${c.courseCode || c.code || ''} ${c.courseName || c.name || ''}`.trim() || 'Course'
+            }))}
             required
           />
           <div className="form-group">
@@ -98,34 +112,68 @@ export const MarkAttendance = () => {
         <div className="card">
           <h4 className="mb-4" style={{ fontFamily: 'Outfit', fontWeight: 600 }}>Students Roll Call</h4>
           <Table
-            headers={['Student ID', 'Student Name', 'Attendance Status']}
+            headers={['Student ID', 'Student Name', 'Assigned Class', 'Attendance Status']}
             data={students}
-            renderRow={(student) => (
-              <tr key={student._id}>
-                <td>{student.studentId || 'N/A'}</td>
-                <td style={{ fontWeight: 500 }}>{student.firstName} {student.lastName}</td>
-                <td>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={records[student._id] === 'Present' ? 'primary' : 'secondary'}
-                      style={{ padding: '0.4rem 0.8rem' }}
-                      onClick={() => handleStatusChange(student._id, 'Present')}
-                    >
-                      Present
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={records[student._id] === 'Absent' ? 'danger' : 'secondary'}
-                      style={{ padding: '0.4rem 0.8rem' }}
-                      onClick={() => handleStatusChange(student._id, 'Absent')}
-                    >
-                      Absent
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            )}
+            renderRow={(student) => {
+              const sid = student._id || student.id || student.studentId;
+              const currentStatus = records[sid] || 'Present';
+              const isPresent = currentStatus === 'Present';
+              const isAbsent = currentStatus === 'Absent';
+              const assignedClass = student.class || student.department || 'Class 10';
+
+              return (
+                <tr key={sid}>
+                  <td>{student.studentId || 'N/A'}</td>
+                  <td style={{ fontWeight: 500 }}>
+                    {student.firstName || student.lastName
+                      ? `${student.firstName || ''} ${student.lastName || ''}`.trim()
+                      : student.name || 'Student'}
+                  </td>
+                  <td>
+                    <span className="badge badge-secondary">{assignedClass}</span>
+                  </td>
+                  <td>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        style={{
+                          padding: '0.4rem 1rem',
+                          borderRadius: '6px',
+                          border: '1px solid ' + (isPresent ? '#16a34a' : 'var(--border-color)'),
+                          backgroundColor: isPresent ? '#22c55e' : 'var(--bg-card)',
+                          color: isPresent ? '#ffffff' : 'var(--text-main)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isPresent ? '0 2px 6px rgba(34, 197, 94, 0.3)' : 'none',
+                        }}
+                        onClick={() => handleStatusChange(sid, 'Present')}
+                      >
+                        ✓ Present
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          padding: '0.4rem 1rem',
+                          borderRadius: '6px',
+                          border: '1px solid ' + (isAbsent ? '#dc2626' : 'var(--border-color)'),
+                          backgroundColor: isAbsent ? '#ef4444' : 'var(--bg-card)',
+                          color: isAbsent ? '#ffffff' : 'var(--text-main)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isAbsent ? '0 2px 6px rgba(239, 68, 68, 0.3)' : 'none',
+                        }}
+                        onClick={() => handleStatusChange(sid, 'Absent')}
+                      >
+                        ✕ Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            }}
           />
 
           <div className="flex gap-4 mt-6">
@@ -138,5 +186,6 @@ export const MarkAttendance = () => {
     </div>
   );
 };
+
 
 export default MarkAttendance;

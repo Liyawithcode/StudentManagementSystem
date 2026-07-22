@@ -18,7 +18,8 @@ import {
   HiOutlinePhone,
   HiOutlineChartBar,
   HiOutlineBookOpen,
-  HiOutlineClipboardList
+  HiOutlineClipboardList,
+  HiOutlineHome
 } from 'react-icons/hi';
 import './auth.css';
 
@@ -48,9 +49,9 @@ export const Register = () => {
         const user = result.user;
         idToken = await user.getIdToken();
       } catch (popupErr) {
-        console.error('Google popup sign-in failed:', popupErr);
+        console.warn('Google popup sign-in failed or closed:', popupErr);
         if (import.meta.env.DEV) {
-          toast.info('Google Sign-In failed. Falling back to developer mock login...');
+          toast.info('Google Auth unconfigured or failed in Firebase. Using Developer Mock Login...');
           idToken = 'mock_google_id_token';
         } else {
           throw popupErr;
@@ -183,6 +184,14 @@ export const Register = () => {
         <div className="blob blob-2"></div>
 
         <div className="login-form-container">
+          {/* Back to Homepage Button */}
+          <div className="back-home-wrapper">
+            <Link to="/" className="back-home-btn">
+              <HiOutlineHome />
+              <span>Back to Homepage</span>
+            </Link>
+          </div>
+
           {/* Header branding visible only on Mobile/Tablet */}
           <div className="login-header-logo">
             <div className="brand-logo">I</div>

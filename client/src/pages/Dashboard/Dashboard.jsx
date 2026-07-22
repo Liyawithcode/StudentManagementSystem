@@ -77,10 +77,13 @@ export const Dashboard = () => {
   // Helper to format greeting and name
   const getDisplayName = () => {
     if (!user) return 'Academic Member';
-    if (user.role === 'admin') return user.adminfullname || 'Administrator';
+    if (user.role === 'admin') return user.adminfullname || user.name || 'Administrator';
+    if (user.role === 'faculty') {
+      return user.facultyfullname || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '') || user.name || 'Faculty Member';
+    }
     const first = user.firstName || '';
     const last = user.lastName || '';
-    return `${first} ${last}`.trim() || 'Academic Member';
+    return `${first} ${last}`.trim() || user.name || 'Student';
   };
 
   const getGreeting = () => {
@@ -99,6 +102,10 @@ export const Dashboard = () => {
     hostelRooms: stats.hostelRooms !== undefined ? stats.hostelRooms : 120,
     transportRoutes: stats.transportRoutes !== undefined ? stats.transportRoutes : 18,
     unpaidFeesInvoices: stats.unpaidFeesInvoices !== undefined ? stats.unpaidFeesInvoices : 5,
+    programLabels: stats.programLabels,
+    programDataPoints: stats.programDataPoints,
+    attendanceLabels: stats.attendanceLabels,
+    attendanceDataPoints: stats.attendanceDataPoints,
     recentNotices: stats.recentNotices || [
       { id: '1', title: 'Summer Vacations Announcement', date: '2026-06-25', category: 'General', postedBy: 'Dean of Academics' },
       { id: '2', title: 'Final Semester Examinations Schedule', date: '2026-06-22', category: 'Academic', postedBy: 'Controller of Exams' },
@@ -127,17 +134,17 @@ export const Dashboard = () => {
       return [
         {
           label: "Attendance Rate",
-          val: stats?.attendanceRate !== undefined ? `${stats.attendanceRate}%` : "92.5%",
-          change: "Active",
+          val: stats?.attendanceRate !== undefined ? `${stats.attendanceRate}%` : "95.0%",
+          change: stats?.assignedClass || user?.class || "Class 10",
           changeType: "info-badge",
-          desc: "Based on class records",
+          desc: "Recorded attendance rate",
           icon: <FiUserCheck />,
           color: "hsl(224, 76%, 48%)",
           glow: "rgba(30, 64, 175, 0.12)"
         },
         {
           label: "Academic Performance",
-          val: stats?.performance !== undefined && stats?.performance > 0 ? `${stats.performance}%` : "85.0%",
+          val: stats?.performance !== undefined && stats?.performance > 0 ? `${stats.performance}%` : "88.5%",
           change: "Term Grade",
           changeType: "positive",
           desc: "Cumulative average percentage",
@@ -173,7 +180,7 @@ export const Dashboard = () => {
         {
           label: "Assigned Subjects",
           val: stats?.subjects !== undefined ? stats.subjects : 3,
-          change: "Allocated",
+          change: user?.department || "General",
           changeType: "info-badge",
           desc: "Subjects allocated to teach",
           icon: <FiBook />,
@@ -192,10 +199,10 @@ export const Dashboard = () => {
         },
         {
           label: "My Students",
-          val: stats?.students !== undefined ? stats.students : 120,
-          change: "Department-wide",
+          val: stats?.students !== undefined ? stats.students : 35,
+          change: "Class & Dept",
           changeType: "info-badge",
-          desc: "Students in your department",
+          desc: "Enrolled in assigned department",
           icon: <FiUsers />,
           color: "hsl(142, 72%, 29%)",
           glow: "rgba(16, 185, 129, 0.12)"
@@ -388,17 +395,25 @@ export const Dashboard = () => {
         <div className="welcome-text-container">
           <h1 className="welcome-title">{getGreeting()}, {getDisplayName()}!</h1>
           <p className="welcome-subtitle">
-            Welcome to your administrative command center. Here is your real-time report, schedule tracking, and academic updates.
+            {user?.role === 'student'
+              ? `Assigned Class: ${user?.class || stats?.assignedClass || 'Class 10'} • Student ID: ${user?.studentId || 'ST-2026-0001'}`
+              : user?.role === 'faculty'
+              ? `Department: ${user?.department || 'General Academics'} • Faculty ID: ${user?.facultyId || 'FAC-2026-001'}`
+              : 'Welcome to your administrative command center. Real-time reports and academic updates.'}
           </p>
           <div className="welcome-meta-info">
             <div className="welcome-meta-item">
               <FiCalendar />
-              <span>Thursday, July 2, 2026</span>
+              <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             </div>
             <div className="welcome-meta-item">
               <FiActivity />
               <span style={{ textTransform: 'capitalize' }}>Role: {user?.role || 'admin'} Portal</span>
             </div>
+            <Link to="/" className="dashboard-home-btn">
+              <FiHome />
+              <span>Homepage</span>
+            </Link>
           </div>
         </div>
         <div className="welcome-illustration">
@@ -440,23 +455,23 @@ export const Dashboard = () => {
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiUserCheck /></span>
                 <span>Mark Attendance</span>
               </Link>
+              <Link to="/attendance" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiActivity /></span>
+                <span>Attendance Logs</span>
+              </Link>
               <Link to="/exams/marks" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiFileText /></span>
+                <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiFileText /></span>
                 <span>Add Exam Marks</span>
               </Link>
               <Link to="/notice/add" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiBell /></span>
-                <span>Add Notice</span>
+                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiBell /></span>
+                <span>Post Announcement</span>
               </Link>
             </>
           )}
           {user?.role === 'student' && (
             <>
-              <Link to="/profile" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiUsers /></span>
-                <span>View Profile</span>
-              </Link>
-              <Link to="/attendance/report" className="quick-action-btn">
+              <Link to="/attendance" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiActivity /></span>
                 <span>My Attendance</span>
               </Link>
@@ -466,12 +481,17 @@ export const Dashboard = () => {
               </Link>
               <Link to="/fees" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiDollarSign /></span>
-                <span>My Fees</span>
+                <span>My Fee Dues</span>
+              </Link>
+              <Link to="/profile" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiUsers /></span>
+                <span>My Student Profile</span>
               </Link>
             </>
           )}
         </div>
       </div>
+
 
       {/* Premium Stats Grid */}
       <div className="premium-stats-grid">
@@ -629,14 +649,14 @@ export const Dashboard = () => {
             <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, margin: 0 }}>Weekly Attendance Performance</h4>
             <span className="badge badge-success">Target: 95%+</span>
           </div>
-          <AttendanceChart />
+          <AttendanceChart labels={displayStats.attendanceLabels} dataPoints={displayStats.attendanceDataPoints} />
         </div>
         <div className="card">
           <div className="flex justify-between items-center mb-4">
             <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, margin: 0 }}>Program-wise Enrollments</h4>
             <span className="badge badge-info">Regular Term</span>
           </div>
-          <StudentChart />
+          <StudentChart labels={displayStats.programLabels} dataPoints={displayStats.programDataPoints} />
         </div>
       </div>
 

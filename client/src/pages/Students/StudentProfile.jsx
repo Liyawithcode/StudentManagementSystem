@@ -6,13 +6,17 @@ import Button from '../../components/common/Button.jsx';
 import { studentService } from '../../services/studentService.js';
 import { formatDate } from '../../utils/dateFormatter.js';
 import { toast } from '../../utils/toast.js';
-import { FiEdit, FiArrowLeft, FiUser } from 'react-icons/fi';
+import { useAuth } from '../../hooks/useAuth.js';
+import { FiEdit, FiArrowLeft, FiUser, FiTrash } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const StudentProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,6 +33,16 @@ export const StudentProfile = () => {
     fetchProfile();
   }, [id, navigate]);
 
+  const handleDelete = async () => {
+    try {
+      await studentService.deleteStudent(student._id);
+      toast.success('Student deleted successfully');
+      navigate('/students');
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete student');
+    }
+  };
+
   if (loading) return <Loader />;
   if (!student) return <div className="text-center mt-8">Student not found</div>;
 
@@ -44,14 +58,22 @@ export const StudentProfile = () => {
                 <FiArrowLeft /> Back to List
               </Button>
             </Link>
-            <Link to={`/students/edit/${student._id}`}>
-              <Button variant="primary">
-                <FiEdit /> Edit Profile
-              </Button>
-            </Link>
+            {role === 'admin' && (
+              <>
+                <Link to={`/students/edit/${student._id}`}>
+                  <Button variant="primary">
+                    <FiEdit /> Edit Profile
+                  </Button>
+                </Link>
+                <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+                  <FiTrash /> Delete Profile
+                </Button>
+              </>
+            )}
           </div>
         }
       />
+
 
       <div className="grid gap-6 mt-4" style={{ gridTemplateColumns: '1fr 2fr' }}>
         {/* Left Side: Avatar Card */}
@@ -122,8 +144,16 @@ export const StudentProfile = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this student record? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default StudentProfile;
+

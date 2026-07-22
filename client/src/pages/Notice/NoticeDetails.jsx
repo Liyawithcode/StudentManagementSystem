@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import Button from '../../components/common/Button.jsx';
 import { noticeService } from '../../services/noticeService.js';
 import { formatDate } from '../../utils/dateFormatter.js';
-import { FiArrowLeft } from 'react-icons/fi';
+import { toast } from '../../utils/toast.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { FiArrowLeft, FiTrash } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const NoticeDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { role } = useAuth();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -27,6 +33,16 @@ export const NoticeDetails = () => {
     fetchDetails();
   }, [id]);
 
+  const handleDelete = async () => {
+    try {
+      await noticeService.deleteNotice(id);
+      toast.success('Notice deleted successfully');
+      navigate('/notice');
+    } catch (err) {
+      toast.error('Failed to delete notice');
+    }
+  };
+
   if (loading) return <Loader />;
   if (!notice) return <div className="text-center mt-8">Notice not found</div>;
 
@@ -36,11 +52,18 @@ export const NoticeDetails = () => {
         title={notice.title}
         subtitle={`Posted on ${formatDate(notice.createdAt || notice.date)}`}
         actions={
-          <Link to="/notice">
-            <Button variant="secondary">
-              <FiArrowLeft /> Back to Board
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to="/notice">
+              <Button variant="secondary">
+                <FiArrowLeft /> Back to Board
+              </Button>
+            </Link>
+            {role === 'admin' && (
+              <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+                <FiTrash /> Delete Notice
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -49,8 +72,16 @@ export const NoticeDetails = () => {
           {notice.message || notice.content}
         </p>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this notice? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default NoticeDetails;
+

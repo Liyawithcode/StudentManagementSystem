@@ -44,13 +44,13 @@ export const enterMarks = async (req, res) => {
       result.obtainedMarks = obtained;
       result.totalMarks = total;
       result.percentage = percentage;
-      
+
       let grade = "F";
       if (percentage >= 90) grade = "A+";
       else if (percentage >= 75) grade = "A";
       else if (percentage >= 60) grade = "B";
       else if (percentage >= 40) grade = "C";
-      
+
       result.grade = grade;
       result.resultStatus = percentage >= 40 ? "Pass" : "Fail";
     }

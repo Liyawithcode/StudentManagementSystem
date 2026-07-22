@@ -10,8 +10,19 @@ export const apiCall = async (method, url, data = null, options = {}) => {
     });
     return response.data;
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Something went wrong';
-    throw new Error(message);
+    let message = error.response?.data?.message;
+    if (!message && typeof error.response?.data === 'string' && error.response.data.trim()) {
+      message = error.response.data;
+    }
+    if (!message && error.message) {
+      if (error.message.includes('JSON') || error.message.includes('Unexpected token')) {
+        message = 'Server response error. Please check your network connection or try again.';
+      } else {
+        message = error.message;
+      }
+    }
+    throw new Error(message || 'Something went wrong');
   }
 };
+
 export default axiosInstance;

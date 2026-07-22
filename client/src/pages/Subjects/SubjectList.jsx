@@ -11,12 +11,14 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { FiPlus, FiTrash } from 'react-icons/fi';
 import { courseService } from '../../services/courseService.js';
 import { toast } from '../../utils/toast.js';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const SubjectList = () => {
   const dispatch = useDispatch();
   const { subjectsList, loading } = useSelector((state) => state.courses);
   const { role } = useAuth();
   const [search, setSearch] = useState('');
+  const [deleteSubjectId, setDeleteSubjectId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchSubjects());
@@ -30,11 +32,12 @@ export const SubjectList = () => {
     return code.includes(term) || name.includes(term) || type.includes(term);
   });
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this subject?')) return;
+  const handleDelete = async () => {
+    if (!deleteSubjectId) return;
     try {
-      await courseService.deleteSubject(id);
+      await courseService.deleteSubject(deleteSubjectId);
       toast.success('Subject deleted');
+      setDeleteSubjectId(null);
       dispatch(fetchSubjects());
     } catch (err) {
       toast.error('Failed to delete subject');
@@ -70,23 +73,35 @@ export const SubjectList = () => {
         <Table
           headers={['Subject Code', 'Subject Name', 'Type', 'Actions']}
           data={filteredSubjects}
-          renderRow={(subject) => (
-            <tr key={subject._id}>
-              <td style={{ fontWeight: 600 }}>{subject.subjectCode || subject.code || 'SUBJ'}</td>
-              <td>{subject.subjectName || subject.name}</td>
-              <td>{subject.type || 'Theory'}</td>
-              <td>
-                {role === 'admin' && (
-                  <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => handleDelete(subject._id)}><FiTrash /></Button>
-                )}
-              </td>
-            </tr>
-          )}
+          renderRow={(subject) => {
+            const subId = subject._id || subject.id || subject.subjectCode || subject.code;
+            return (
+              <tr key={subId}>
+                <td style={{ fontWeight: 600 }}>{subject.subjectCode || subject.code || 'SUBJ'}</td>
+                <td>{subject.subjectName || subject.name}</td>
+                <td>{subject.type || 'Theory'}</td>
+                <td>
+                  {role === 'admin' && (
+                    <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => setDeleteSubjectId(subId)}><FiTrash /></Button>
+                  )}
+                </td>
+              </tr>
+            );
+          }}
+
           emptyMessage="No subjects matching criteria found"
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteSubjectId}
+        onClose={() => setDeleteSubjectId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this subject? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default SubjectList;
+

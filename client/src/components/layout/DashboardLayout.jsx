@@ -12,17 +12,27 @@ export const DashboardLayout = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  const closeMobileSidebar = () => {
+    if (window.innerWidth <= 768) {
+      setSidebarCollapsed(true);
+    }
+  };
+
   return (
     <div className="dashboard-layout flex">
-      <Sidebar collapsed={sidebarCollapsed} />
-      
+      <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} onNavClick={closeMobileSidebar} />
+
+      {!sidebarCollapsed && (
+        <div className="sidebar-backdrop" onClick={closeMobileSidebar} />
+      )}
+
       <div className="main-container flex flex-column flex-1">
         <Navbar toggleSidebar={toggleSidebar} />
-        
+
         <main className="main-content flex-1 animate-fade-in">
           <Outlet />
         </main>
-        
+
         <Footer />
       </div>
     </div>

@@ -25,6 +25,7 @@ export const TeacherList = () => {
   }, [dispatch]);
 
   const handleDelete = async () => {
+    if (!deleteId) return;
     try {
       await teacherService.deleteTeacher(deleteId);
       toast.success('Teacher record removed successfully');
@@ -35,9 +36,20 @@ export const TeacherList = () => {
     }
   };
 
+  const getTeacherName = (teacher) => {
+    if (!teacher) return 'N/A';
+    if (teacher.facultyfullname) return teacher.facultyfullname;
+    if (teacher.firstName || teacher.lastName) {
+      return `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim();
+    }
+    if (teacher.name) return teacher.name;
+    if (teacher.fullName) return teacher.fullName;
+    return 'N/A';
+  };
+
   const filtered = list.filter((teacher) => {
     const term = search.toLowerCase();
-    const name = (teacher.facultyfullname || teacher.name || '').toLowerCase();
+    const name = getTeacherName(teacher).toLowerCase();
     const email = (teacher.email || '').toLowerCase();
     return name.includes(term) || email.includes(term);
   });
@@ -72,41 +84,46 @@ export const TeacherList = () => {
         <Table
           headers={['Teacher ID', 'Name', 'Email', 'Phone', 'Department', 'Actions']}
           data={filtered}
-          renderRow={(teacher) => (
-            <tr key={teacher._id}>
-              <td>{teacher.facultyId || 'N/A'}</td>
-              <td style={{ fontWeight: 500 }}>{teacher.facultyfullname || teacher.name}</td>
-              <td>{teacher.email}</td>
-              <td>{teacher.phone || 'N/A'}</td>
-              <td>{teacher.department || 'General'}</td>
-              <td className="flex gap-2">
-                <Link to={`/teachers/profile/${teacher._id}`} title="Profile">
-                  <Button variant="secondary" style={{ padding: '0.4rem' }}>
-                    <FiEye />
-                  </Button>
-                </Link>
-                {role === 'admin' && (
-                  <>
-                    <Link to={`/teachers/edit/${teacher._id}`} title="Edit">
-                      <Button variant="secondary" style={{ padding: '0.4rem' }}>
-                        <FiEdit />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="danger"
-                      style={{ padding: '0.4rem' }}
-                      onClick={() => setDeleteId(teacher._id)}
-                      title="Delete"
-                    >
-                      <FiTrash />
+          renderRow={(teacher) => {
+            const tid = teacher._id || teacher.id || teacher.facultyId;
+            return (
+              <tr key={tid}>
+                <td>{teacher.facultyId || 'N/A'}</td>
+                <td style={{ fontWeight: 500 }}>{getTeacherName(teacher)}</td>
+                <td>{teacher.email}</td>
+                <td>{teacher.phone || 'N/A'}</td>
+                <td>{teacher.department || 'General'}</td>
+                <td className="flex gap-2">
+
+                  <Link to={`/teachers/profile/${tid}`} title="Profile">
+                    <Button variant="secondary" style={{ padding: '0.4rem' }}>
+                      <FiEye />
                     </Button>
-                  </>
-                )}
-              </td>
-            </tr>
-          )}
+                  </Link>
+                  {role === 'admin' && (
+                    <>
+                      <Link to={`/teachers/edit/${tid}`} title="Edit">
+                        <Button variant="secondary" style={{ padding: '0.4rem' }}>
+                          <FiEdit />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="danger"
+                        style={{ padding: '0.4rem' }}
+                        onClick={() => setDeleteId(tid)}
+                        title="Delete"
+                      >
+                        <FiTrash />
+                      </Button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          }}
         />
       )}
+
 
       <ConfirmDialog
         isOpen={!!deleteId}

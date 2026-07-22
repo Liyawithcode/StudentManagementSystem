@@ -11,11 +11,11 @@ import { User } from "../model/user.model.js";
 export const protect = async (req, res, next) => {
     try {
         let token;
-        
+
         // Check Authorization Header
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
-        } 
+        }
         // Check Cookies
         else if (req.cookies && req.cookies.accessToken) {
             token = req.cookies.accessToken;

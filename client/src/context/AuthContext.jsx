@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      // Silently sync latest profile in background
       dispatch(loadProfile());
     }
 
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener('auth-logout', handleLogoutEvent);
     };
   }, [isAuthenticated, dispatch]);
+
 
   const login = async (email, password) => {
     return dispatch(loginUser({ email, password })).unwrap();

@@ -29,13 +29,17 @@ export const loadProfile = createAsyncThunk('auth/loadProfile', async (_, thunkA
   }
 });
 
+const savedUser = getLocalStorage('user', null);
+const savedToken = localStorage.getItem('accessToken') || null;
+
 const initialState = {
-  user: getLocalStorage('user', null),
-  accessToken: localStorage.getItem('accessToken') || null,
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  user: savedUser,
+  accessToken: savedToken,
+  isAuthenticated: !!(savedUser || savedToken),
   loading: false,
   error: null,
 };
+
 
 const authSlice = createSlice({
   name: 'auth',

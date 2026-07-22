@@ -11,6 +11,8 @@ export const noticeService = {
   },
 
   deleteNotice: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid notice ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.COMMUNICATION.NOTICES}/${id}`);
   },
+
 };

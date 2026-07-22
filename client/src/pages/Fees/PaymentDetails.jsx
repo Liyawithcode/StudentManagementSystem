@@ -11,7 +11,8 @@ import { receiptService } from "../../services/receiptService.js";
 import { toast } from "../../utils/toast.js";
 import { formatDate } from "../../utils/dateFormatter.js";
 import { formatCurrency } from "../../utils/helpers.js";
-import { FiDownload, FiDollarSign, FiCornerUpLeft, FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
+import { FiDownload, FiDollarSign, FiCornerUpLeft, FiAlertTriangle, FiArrowLeft, FiTrash } from "react-icons/fi";
+import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
 
 export const PaymentDetails = () => {
   const { id } = useParams();
@@ -23,6 +24,18 @@ export const PaymentDetails = () => {
   const [refunding, setRefunding] = useState(false);
   const [refundAmount, setRefundAmount] = useState("");
   const [refundRemarks, setRefundRemarks] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeletePayment = async () => {
+    try {
+      await paymentService.deletePayment(id);
+      toast.success("Payment ledger record deleted successfully");
+      navigate("/fees/payments");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete payment record");
+    }
+  };
+
 
   const loadDetails = async () => {
     try {
@@ -123,15 +136,23 @@ export const PaymentDetails = () => {
         <Button variant="secondary" onClick={() => navigate(-1)}>
           <FiArrowLeft /> Back
         </Button>
-        <span className={`badge ${getStatusBadgeClass(payment.paymentStatus)}`} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
-          {payment.paymentStatus}
-        </span>
+        <div className="flex gap-2 items-center">
+          {role === "admin" && (
+            <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+              <FiTrash /> Delete Ledger
+            </Button>
+          )}
+          <span className={`badge ${getStatusBadgeClass(payment.paymentStatus)}`} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
+            {payment.paymentStatus}
+          </span>
+        </div>
       </div>
 
       <Header
         title={`${payment.feeCategory} Invoice Details`}
         subtitle={`Invoice Ref ID: #${payment._id.substring(18).toUpperCase()}`}
       />
+
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Bill Summary */}
@@ -294,8 +315,16 @@ export const PaymentDetails = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeletePayment}
+        message="Are you sure you want to delete this payment ledger record? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default PaymentDetails;
+

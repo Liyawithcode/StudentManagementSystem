@@ -11,12 +11,14 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { FiPlus, FiEdit, FiTrash } from 'react-icons/fi';
 import { courseService } from '../../services/courseService.js';
 import { toast } from '../../utils/toast.js';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const CourseList = () => {
   const dispatch = useDispatch();
   const { coursesList, loading } = useSelector((state) => state.courses);
   const { role } = useAuth();
   const [search, setSearch] = useState('');
+  const [deleteCourseId, setDeleteCourseId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -29,11 +31,12 @@ export const CourseList = () => {
     return code.includes(term) || name.includes(term);
   });
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this course?')) return;
+  const handleDelete = async () => {
+    if (!deleteCourseId) return;
     try {
-      await courseService.deleteCourse(id);
+      await courseService.deleteCourse(deleteCourseId);
       toast.success('Course deleted');
+      setDeleteCourseId(null);
       dispatch(fetchCourses());
     } catch (err) {
       toast.error('Failed to delete course');
@@ -69,28 +72,40 @@ export const CourseList = () => {
         <Table
           headers={['Course Code', 'Course Name', 'Credits', 'Actions']}
           data={filteredCourses}
-          renderRow={(course) => (
-            <tr key={course._id}>
-              <td style={{ fontWeight: 600 }}>{course.courseCode || course.code}</td>
-              <td>{course.courseName || course.name}</td>
-              <td>{course.credits || 3}</td>
-              <td className="flex gap-2">
-                {role === 'admin' && (
-                  <>
-                    <Link to={`/courses/edit/${course._id}`}>
-                      <Button variant="secondary" style={{ padding: '0.4rem' }}><FiEdit /></Button>
-                    </Link>
-                    <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => handleDelete(course._id)}><FiTrash /></Button>
-                  </>
-                )}
-              </td>
-            </tr>
-          )}
+          renderRow={(course) => {
+            const cid = course._id || course.id || course.code || course.courseCode;
+            return (
+              <tr key={cid}>
+                <td style={{ fontWeight: 600 }}>{course.courseCode || course.code}</td>
+                <td>{course.courseName || course.name}</td>
+                <td>{course.credits || 3}</td>
+                <td className="flex gap-2">
+                  {role === 'admin' && (
+                    <>
+                      <Link to={`/courses/edit/${cid}`}>
+                        <Button variant="secondary" style={{ padding: '0.4rem' }}><FiEdit /></Button>
+                      </Link>
+                      <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => setDeleteCourseId(cid)}><FiTrash /></Button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          }}
+
           emptyMessage="No courses matching criteria found"
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteCourseId}
+        onClose={() => setDeleteCourseId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this course? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default CourseList;
+

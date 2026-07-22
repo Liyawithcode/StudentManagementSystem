@@ -17,7 +17,7 @@ export const AddNotice = () => {
     if (!title || !content) return toast.error('Both title and content are required');
     setLoading(true);
     try {
-      await noticeService.createNotice({ title, message: content });
+      await noticeService.createNotice({ title, content, message: content });
       toast.success('Notice posted successfully!');
       navigate('/notice');
     } catch (err) {

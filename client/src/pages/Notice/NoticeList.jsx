@@ -12,12 +12,14 @@ import { FiPlus, FiEye, FiTrash } from 'react-icons/fi';
 import { noticeService } from '../../services/noticeService.js';
 import { formatDate } from '../../utils/dateFormatter.js';
 import { toast } from '../../utils/toast.js';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const NoticeList = () => {
   const dispatch = useDispatch();
   const { list, loading } = useSelector((state) => state.notices);
   const { role } = useAuth();
   const [search, setSearch] = useState('');
+  const [deleteNoticeId, setDeleteNoticeId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchNotices());
@@ -29,16 +31,18 @@ export const NoticeList = () => {
     return title.includes(term);
   });
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this announcement?')) return;
+  const handleDelete = async () => {
+    if (!deleteNoticeId) return;
     try {
-      await noticeService.deleteNotice(id);
+      await noticeService.deleteNotice(deleteNoticeId);
       toast.success('Notice deleted');
+      setDeleteNoticeId(null);
       dispatch(fetchNotices());
     } catch (err) {
       toast.error('Failed to delete notice');
     }
   };
+
 
   return (
     <div>
@@ -78,7 +82,7 @@ export const NoticeList = () => {
                   <Button variant="secondary" style={{ padding: '0.4rem' }}><FiEye /></Button>
                 </Link>
                 {role === 'admin' && (
-                  <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => handleDelete(notice._id || notice.id)}>
+                  <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => setDeleteNoticeId(notice._id || notice.id)}>
                     <FiTrash />
                   </Button>
                 )}
@@ -88,8 +92,16 @@ export const NoticeList = () => {
           emptyMessage="No notices currently posted"
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteNoticeId}
+        onClose={() => setDeleteNoticeId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this notice? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default NoticeList;
+

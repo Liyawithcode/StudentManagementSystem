@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from "react";
 import Header from "../../components/layout/Header.jsx";
 import Table from "../../components/common/Table.jsx";
@@ -6,11 +8,13 @@ import Loader from "../../components/common/Loader.jsx";
 import SearchBar from "../../components/common/SearchBar.jsx";
 import Dropdown from "../../components/common/Dropdown.jsx";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.js";
 import { paymentService } from "../../services/paymentService.js";
 import { toast } from "../../utils/toast.js";
 import { formatDate } from "../../utils/dateFormatter.js";
 import { formatCurrency } from "../../utils/helpers.js";
-import { FiEye, FiCheckSquare, FiRefreshCw, FiDollarSign } from "react-icons/fi";
+import { FiEye, FiCheckSquare, FiRefreshCw, FiDollarSign, FiTrash } from "react-icons/fi";
+import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Statuses" },
@@ -35,11 +39,13 @@ const CATEGORY_OPTIONS = [
 ];
 
 export const PaymentList = () => {
+  const { role } = useAuth();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [deletePaymentId, setDeletePaymentId] = useState(null);
 
   const fetchPayments = async () => {
     try {
@@ -53,7 +59,21 @@ export const PaymentList = () => {
     }
   };
 
+  const handleDeletePayment = async () => {
+    if (!deletePaymentId) return;
+    try {
+      await paymentService.deletePayment(deletePaymentId);
+      toast.success("Payment ledger record deleted successfully");
+      setDeletePaymentId(null);
+      fetchPayments();
+    } catch (err) {
+      toast.error(err.message || "Failed to delete payment record");
+    }
+  };
+
+
   useEffect(() => {
+
     fetchPayments();
   }, []);
 
@@ -150,47 +170,74 @@ export const PaymentList = () => {
               "Action",
             ]}
             data={filteredPayments}
-            renderRow={(payment) => (
-              <tr key={payment._id}>
-                <td>{payment.studentId}</td>
-                <td style={{ fontWeight: 500 }}>{payment.studentName}</td>
-                <td>{`${payment.class} / ${payment.semester}`}</td>
-                <td>
-                  <span className="badge badge-info" style={{ fontSize: "0.75rem" }}>
-                    {payment.feeCategory}
-                  </span>
-                </td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(payment.totalAmount)}</td>
-                <td style={{ color: "var(--success)" }}>{formatCurrency(payment.paidAmount)}</td>
-                <td style={{ color: "var(--danger)" }}>{formatCurrency(payment.dueAmount)}</td>
-                <td>
-                  <span className="badge badge-secondary" style={{ fontSize: "0.7rem" }}>
-                    {payment.paymentMethod || "None"}
-                  </span>
-                </td>
-                <td>
-                  <span className={`badge ${getStatusBadge(payment.paymentStatus)}`}>
-                    {payment.paymentStatus}
-                  </span>
-                </td>
-                <td>
-                  <Link to={`/fees/payments/${payment._id}`}>
-                    <Button
-                      variant="secondary"
-                      style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
-                    >
-                      <FiEye /> View
-                    </Button>
-                  </Link>
-                </td>
-              </tr>
-            )}
+            renderRow={(payment) => {
+              const pid = payment._id || payment.id;
+              return (
+                <tr key={pid}>
+                  <td style={{ fontWeight: 600 }}>{payment.enrollmentNumber || payment.studentId}</td>
+                  <td>{payment.studentName}</td>
+                  <td>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+                      {payment.class} - {payment.semester}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="badge badge-secondary" style={{ fontSize: "0.75rem" }}>
+                      {payment.feeCategory}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{formatCurrency(payment.totalAmount)}</td>
+                  <td style={{ color: "var(--success)" }}>{formatCurrency(payment.paidAmount)}</td>
+                  <td style={{ color: "var(--danger)" }}>{formatCurrency(payment.dueAmount)}</td>
+                  <td>
+                    <span className="badge badge-secondary" style={{ fontSize: "0.7rem" }}>
+                      {payment.paymentMethod || "None"}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${getStatusBadge(payment.paymentStatus)}`}>
+                      {payment.paymentStatus}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex gap-2">
+                      <Link to={`/fees/payments/${pid}`}>
+                        <Button
+                          variant="secondary"
+                          style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
+                        >
+                          <FiEye /> View
+                        </Button>
+                      </Link>
+                      {role === "admin" && (
+                        <Button
+                          variant="danger"
+                          style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
+                          onClick={() => setDeletePaymentId(pid)}
+                          title="Delete Ledger"
+                        >
+                          <FiTrash />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            }}
             emptyMessage="No billing ledger entries match the selected filters."
           />
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deletePaymentId}
+        onClose={() => setDeletePaymentId(null)}
+        onConfirm={handleDeletePayment}
+        message="Are you sure you want to delete this payment ledger record? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default PaymentList;
+

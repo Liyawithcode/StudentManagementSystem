@@ -527,3 +527,55 @@ body.dark-theme .input-custom:focus {
   }
 }
 
+/* ===================== Back to Homepage Button (Auth Pages) ===================== */
+.back-home-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.back-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem 1.1rem;
+  border-radius: 50px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  letter-spacing: 0.02em;
+}
+
+.back-home-btn svg {
+  font-size: 1rem;
+  transition: transform 0.22s ease;
+}
+
+.back-home-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgba(var(--primary-hue, 325), 60%, 55%, 0.25);
+  transform: translateY(-1px);
+}
+
+.back-home-btn:hover svg {
+  transform: translateX(-3px);
+}
+
+body.dark-theme .back-home-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+body.dark-theme .back-home-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}

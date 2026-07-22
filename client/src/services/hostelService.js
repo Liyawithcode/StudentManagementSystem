@@ -19,5 +19,12 @@ export const hostelService = {
 
   vacateRoom: async (roomId) => {
     return apiCall('post', `/hostels/rooms/vacate/${roomId}`);
+  },
+
+  deleteRoom: async (roomId) => {
+    if (!roomId || roomId === 'null' || roomId === 'undefined') throw new Error('Invalid room ID for deletion');
+    return apiCall('delete', `/hostels/rooms/${roomId}`);
   }
 };
+
+

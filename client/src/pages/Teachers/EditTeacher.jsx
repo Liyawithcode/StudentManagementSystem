@@ -23,11 +23,13 @@ export const EditTeacher = () => {
       try {
         const res = await teacherService.getTeacherById(id);
         const t = res.faculty || res;
+        const nameVal = t.facultyfullname || (t.firstName || t.lastName ? `${t.firstName || ''} ${t.lastName || ''}`.trim() : '') || t.name || '';
         setFormData({
-          facultyfullname: t.facultyfullname || t.name || '',
+          facultyfullname: nameVal,
           phone: t.phone || '',
           department: t.department || '',
         });
+
       } catch (err) {
         toast.error('Failed to load faculty details');
         navigate('/teachers');

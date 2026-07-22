@@ -33,13 +33,35 @@
 
 .sidebar-brand {
   height: var(--header-height);
-  padding: 0 1.5rem;
+  padding: 0 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
   font-size: 1.25rem;
   color: var(--text-inverse);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-on-sidebar);
+  font-size: 1.35rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.sidebar-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-inverse);
 }
 
 .brand-logo {
@@ -238,3 +260,105 @@
   font-size: 0.875rem;
   color: var(--text-muted);
 }
+
+/* Noticeboard Notifications Dropdown */
+.notifications-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+body.dark-theme .notifications-dropdown {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+}
+
+.notifications-dropdown .dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.notifications-dropdown .dropdown-header h4 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.notifications-dropdown .view-all-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.notifications-dropdown .dropdown-body {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notifications-dropdown .dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.notifications-dropdown .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.notifications-dropdown .item-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.notifications-dropdown .item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.notifications-dropdown .item-badge {
+  background: var(--primary-glow);
+  color: var(--primary);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.notifications-dropdown .item-date {
+  color: var(--text-muted);
+}
+
+.notifications-dropdown .dropdown-footer {
+  padding: 0.65rem 1rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.notifications-dropdown .dropdown-footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+

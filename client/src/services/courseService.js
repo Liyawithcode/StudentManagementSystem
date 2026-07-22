@@ -16,6 +16,7 @@ export const courseService = {
     return apiCall('put', `${API_ENDPOINTS.COURSES.BASE}/${id}`, data);
   },
   deleteCourse: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid course ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.COURSES.BASE}/${id}`);
   },
 
@@ -27,8 +28,10 @@ export const courseService = {
     return apiCall('post', API_ENDPOINTS.COURSES.SUBJECTS, data);
   },
   deleteSubject: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid subject ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.COURSES.SUBJECTS}/${id}`);
   },
+
 
   // Classes
   getClasses: async () => {

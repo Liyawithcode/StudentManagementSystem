@@ -882,3 +882,38 @@
     padding: 0.5rem 0.6rem;
   }
 }
+
+/* ===================== Dashboard Homepage Button ===================== */
+.dashboard-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 1rem;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.dashboard-home-btn svg {
+  font-size: 0.95rem;
+  transition: transform 0.22s ease;
+}
+
+.dashboard-home-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-home-btn:hover svg {
+  transform: translateX(-2px);
+}

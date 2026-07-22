@@ -7,12 +7,19 @@ export const paymentService = {
   },
 
   getPaymentById: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') {
+      return { payment: null };
+    }
     return apiCall('get', `${API_ENDPOINTS.PAYMENTS.BASE}/${id}`);
   },
 
   getPaymentsByStudentId: async (studentId) => {
+    if (!studentId || studentId === 'null' || studentId === 'undefined') {
+      return { payments: [] };
+    }
     return apiCall('get', API_ENDPOINTS.PAYMENTS.STUDENT(studentId));
   },
+
 
   createOrder: async (data) => {
     return apiCall('post', API_ENDPOINTS.PAYMENTS.CREATE_ORDER, data);

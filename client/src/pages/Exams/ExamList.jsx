@@ -9,11 +9,13 @@ import { examService } from '../../services/examService.js';
 import { toast } from '../../utils/toast.js';
 import { formatDate } from '../../utils/dateFormatter.js';
 import { FiPlus, FiCalendar, FiFileText, FiDownload } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 export const ExamList = () => {
   const { role } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteExamId, setDeleteExamId] = useState(null);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -29,16 +31,19 @@ export const ExamList = () => {
     fetchSchedules();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Remove this exam schedule?')) return;
+  const handleDelete = async () => {
+    if (!deleteExamId) return;
     try {
-      await examService.deleteExamSchedule(id);
+      await examService.deleteExamSchedule(deleteExamId);
       toast.success('Exam schedule deleted');
-      setExams(exams.filter((e) => e._id !== id));
+      setExams(exams.filter((e) => (e._id || e.id) !== deleteExamId));
+      setDeleteExamId(null);
     } catch (err) {
       toast.error('Failed to delete schedule');
     }
   };
+
+
 
   const handleDownloadExams = () => {
     if (exams.length === 0) {
@@ -190,27 +195,39 @@ export const ExamList = () => {
           <Table
             headers={['Exam Name', 'Date', 'Time', 'Room', 'Actions']}
             data={exams}
-            renderRow={(exam) => (
-              <tr key={exam._id}>
-                <td style={{ fontWeight: 600 }}>{exam.examName}</td>
-                <td>{formatDate(exam.examDate)}</td>
-                <td>{exam.time || '-'}</td>
-                <td>{exam.room || '-'}</td>
-                <td>
-                  {role === 'admin' && (
-                    <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => handleDelete(exam._id)}>
-                      Cancel Exam
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            )}
+            renderRow={(exam) => {
+              const eid = exam._id || exam.id;
+              return (
+                <tr key={eid}>
+                  <td style={{ fontWeight: 600 }}>{exam.examName}</td>
+                  <td>{formatDate(exam.examDate)}</td>
+                  <td>{exam.time || '-'}</td>
+                  <td>{exam.room || '-'}</td>
+                  <td>
+                    {role === 'admin' && (
+                      <Button variant="danger" style={{ padding: '0.4rem' }} onClick={() => setDeleteExamId(eid)}>
+                        Cancel Exam
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            }}
+
             emptyMessage="No examinations scheduled at this time"
           />
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteExamId}
+        onClose={() => setDeleteExamId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to cancel and delete this exam schedule? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default ExamList;
+

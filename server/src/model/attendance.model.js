@@ -20,8 +20,14 @@ const attendanceSchema = new mongoose.Schema(
              required: true,
              enum: ["Present", "Absent"]
         },
+        date:
+        {
+             type: Date,
+             default: Date.now
+        },
     },
     { timestamps: true }
 );
+
 
 export const Attendance = mongoose.model("Attendance", attendanceSchema);

@@ -21,6 +21,9 @@ export const feeService = {
   },
 
   getFeesByStudent: async (studentId) => {
+    if (!studentId || studentId === 'null' || studentId === 'undefined') {
+      return { fees: [] };
+    }
     return apiCall('get', API_ENDPOINTS.FEES.STUDENT(studentId));
   },
 
@@ -29,8 +32,12 @@ export const feeService = {
   },
 
   getInvoice: async (invoiceId) => {
+    if (!invoiceId || invoiceId === 'null' || invoiceId === 'undefined') {
+      return { invoice: null };
+    }
     return apiCall('get', API_ENDPOINTS.FEES.INVOICE(invoiceId));
   },
+
 
   recordPayment: async (data) => {
     return apiCall('post', API_ENDPOINTS.FEES.RECORD_PAYMENT, data);

@@ -10,8 +10,10 @@ export const libraryService = {
   },
 
   deleteBook: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid book ID for deletion');
     return apiCall('delete', `/library/books/${id}`);
   },
+
 
   issueBook: async (issueData) => {
     return apiCall('post', '/library/issue', issueData);

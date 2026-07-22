@@ -7,14 +7,17 @@ export const teacherService = {
   },
 
   getTeacherById: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') return { faculty: null };
     return apiCall('get', `${API_ENDPOINTS.TEACHERS.BASE}/${id}`);
   },
 
   updateTeacher: async (id, data) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid teacher ID');
     return apiCall('put', `${API_ENDPOINTS.TEACHERS.BASE}/${id}`, data);
   },
 
   deleteTeacher: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid teacher ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.TEACHERS.BASE}/${id}`);
   },
 
@@ -23,6 +26,7 @@ export const teacherService = {
   },
 
   getSchedules: async (facultyId) => {
+    if (!facultyId || facultyId === 'null' || facultyId === 'undefined') return { schedules: [] };
     return apiCall('get', API_ENDPOINTS.TEACHERS.SCHEDULES(facultyId));
   },
 
@@ -31,6 +35,8 @@ export const teacherService = {
   },
 
   getLeaveRequests: async (facultyId) => {
+    if (!facultyId || facultyId === 'null' || facultyId === 'undefined') return { requests: [] };
     return apiCall('get', API_ENDPOINTS.TEACHERS.LEAVE_HISTORY(facultyId));
   },
+
 };

@@ -12,6 +12,7 @@ export const examService = {
   },
 
   deleteExamSchedule: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid exam schedule ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.EXAMS.SCHEDULES}/${id}`);
   },
 
@@ -26,6 +27,7 @@ export const examService = {
   },
 
   getResultByStudent: async (studentId) => {
+    if (!studentId || studentId === 'null' || studentId === 'undefined') return { results: [] };
     return apiCall('get', API_ENDPOINTS.RESULTS.STUDENT(studentId));
   },
 
@@ -34,12 +36,15 @@ export const examService = {
   },
 
   updateResult: async (id, data) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid result ID');
     return apiCall('put', `${API_ENDPOINTS.RESULTS.BASE}/${id}`, data);
   },
 
   deleteResult: async (id) => {
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid result ID for deletion');
     return apiCall('delete', `${API_ENDPOINTS.RESULTS.BASE}/${id}`);
   },
+
 
   // Grading
   getGradingScale: async () => {

@@ -7,7 +7,23 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  transformResponse: [
+    (data) => {
+      if (typeof data === 'string') {
+        if (!data || data === 'null' || data === 'undefined') {
+          return null;
+        }
+        try {
+          return JSON.parse(data);
+        } catch (e) {
+          return data;
+        }
+      }
+      return data;
+    },
+  ],
 });
+
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
@@ -31,6 +47,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // If backend is unreachable (502/503 from Vite proxy), skip refresh and propagate
+    if (error.response && (error.response.status === 502 || error.response.status === 503)) {
+      return Promise.reject(error);
+    }
     
     // Prevent infinite loop & check if it is 401
     if (error.response && error.response.status === 401 && !originalRequest._retry) {

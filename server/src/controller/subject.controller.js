@@ -18,6 +18,7 @@ export const createSubject = async (req, res) => {
 
 export const deleteSubject = async (req, res) => {
   const { id } = req.params;
-  subjects = subjects.filter(s => s.id !== id);
+  subjects = subjects.filter(s => s.id !== id && s._id !== id);
   res.status(200).json({ success: true, message: "Subject deleted successfully" });
 };
+

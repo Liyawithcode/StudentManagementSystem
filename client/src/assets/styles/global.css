@@ -29,31 +29,16 @@ a:hover {
   color: var(--primary-hover);
 }
 
-/* Scrollbar styling */
+/* Hide Scrollbars Across All Browsers (Retains Scrolling Functionality) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(38, 15%, 80%);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(38, 15%, 70%);
-}
-
-body.dark-theme ::-webkit-scrollbar-thumb {
-  background: hsl(325, 15%, 22%);
-}
-
-body.dark-theme ::-webkit-scrollbar-thumb:hover {
-  background: hsl(325, 15%, 30%);
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Animations */
