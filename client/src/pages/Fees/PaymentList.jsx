@@ -46,6 +46,7 @@ export const PaymentList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [deletePaymentId, setDeletePaymentId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchPayments = async () => {
     try {
@@ -61,6 +62,7 @@ export const PaymentList = () => {
 
   const handleDeletePayment = async () => {
     if (!deletePaymentId) return;
+    setDeleting(true);
     try {
       await paymentService.deletePayment(deletePaymentId);
       toast.success("Payment ledger record deleted successfully");
@@ -68,6 +70,8 @@ export const PaymentList = () => {
       fetchPayments();
     } catch (err) {
       toast.error(err.message || "Failed to delete payment record");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -233,6 +237,7 @@ export const PaymentList = () => {
         isOpen={!!deletePaymentId}
         onClose={() => setDeletePaymentId(null)}
         onConfirm={handleDeletePayment}
+        loading={deleting}
         message="Are you sure you want to delete this payment ledger record? This action cannot be undone."
       />
     </div>

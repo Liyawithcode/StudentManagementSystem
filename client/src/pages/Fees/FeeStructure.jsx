@@ -11,6 +11,7 @@ import { toast } from "../../utils/toast.js";
 import { formatDate } from "../../utils/dateFormatter.js";
 import { formatCurrency } from "../../utils/helpers.js";
 import { FiPlus, FiEdit, FiTrash2, FiFileText, FiX, FiDollarSign, FiCalendar, FiBook, FiUsers } from "react-icons/fi";
+import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
 
 // ─── Options ────────────────────────────────────────────────────────────
 const FEE_CATEGORIES = [
@@ -207,14 +208,21 @@ export const FeeStructure = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this fee template? All PENDING student ledgers linked to it will also be removed.")) return;
+  const [deleteFeeId, setDeleteFeeId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteFeeId) return;
+    setDeleting(true);
     try {
-      await feeService.deleteFee(id);
+      await feeService.deleteFee(deleteFeeId);
       toast.success("Fee template deleted successfully");
+      setDeleteFeeId(null);
       fetchStructures();
     } catch (err) {
       toast.error(err.message || "Failed to delete fee template");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -311,7 +319,7 @@ export const FeeStructure = () => {
                       <Button
                         variant="danger"
                         style={{ padding: "0.3rem 0.75rem", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "5px" }}
-                        onClick={() => handleDelete(structure._id)}
+                        onClick={() => setDeleteFeeId(structure._id)}
                       >
                         <FiTrash2 size={13} /> Delete
                       </Button>
@@ -495,6 +503,14 @@ export const FeeStructure = () => {
           </form>
         </Modal>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteFeeId}
+        onClose={() => setDeleteFeeId(null)}
+        onConfirm={handleDelete}
+        loading={deleting}
+        message="Delete this fee template? All PENDING student ledgers linked to it will also be removed."
+      />
     </div>
   );
 };

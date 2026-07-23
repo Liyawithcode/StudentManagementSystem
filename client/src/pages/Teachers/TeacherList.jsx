@@ -19,6 +19,7 @@ export const TeacherList = () => {
   const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTeachers());
@@ -26,6 +27,7 @@ export const TeacherList = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    setDeleting(true);
     try {
       await teacherService.deleteTeacher(deleteId);
       toast.success('Teacher record removed successfully');
@@ -33,6 +35,8 @@ export const TeacherList = () => {
       dispatch(fetchTeachers());
     } catch (err) {
       toast.error(err.message || 'Failed to remove teacher');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -129,6 +133,7 @@ export const TeacherList = () => {
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to remove this faculty record?"
       />
     </div>

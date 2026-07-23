@@ -175,6 +175,22 @@ html {
   color: var(--home-primary-hover);
 }
 
+.btn-nav-dashboard {
+  color: var(--home-white);
+  background: linear-gradient(135deg, var(--home-primary), var(--home-cyan));
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-nav-dashboard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  color: var(--home-white);
+}
+
 .btn-nav-register {
   color: var(--home-white);
   background: linear-gradient(135deg, var(--home-primary), var(--home-indigo));
@@ -275,6 +291,15 @@ html {
   transition: all 0.2s ease;
 }
 
+.mobile-btn-dashboard {
+  color: var(--home-white);
+  background: linear-gradient(135deg, var(--home-primary), var(--home-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 .mobile-btn-login {
   color: var(--home-primary);
   background-color: var(--home-primary-light);
@@ -373,6 +398,27 @@ html {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hero-dashboard {
+  background: linear-gradient(135deg, var(--home-primary), var(--home-cyan));
+  color: var(--home-white);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+  border: none;
+}
+
+.btn-hero-dashboard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+  color: var(--home-white);
+}
+
+.btn-hero-dashboard i {
+  transition: transform 0.25s ease;
+}
+
+.btn-hero-dashboard:hover i {
+  transform: scale(1.15);
 }
 
 .btn-hero-primary {

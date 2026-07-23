@@ -16,6 +16,7 @@ export const ExamList = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteExamId, setDeleteExamId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -33,13 +34,16 @@ export const ExamList = () => {
 
   const handleDelete = async () => {
     if (!deleteExamId) return;
+    setDeleting(true);
     try {
       await examService.deleteExamSchedule(deleteExamId);
       toast.success('Exam schedule deleted');
       setExams(exams.filter((e) => (e._id || e.id) !== deleteExamId));
       setDeleteExamId(null);
     } catch (err) {
-      toast.error('Failed to delete schedule');
+      toast.error(err.message || 'Failed to delete schedule');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -223,6 +227,7 @@ export const ExamList = () => {
         isOpen={!!deleteExamId}
         onClose={() => setDeleteExamId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to cancel and delete this exam schedule? This action cannot be undone."
       />
     </div>

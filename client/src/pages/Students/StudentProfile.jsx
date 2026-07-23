@@ -33,13 +33,21 @@ export const StudentProfile = () => {
     fetchProfile();
   }, [id, navigate]);
 
+  const [deleting, setDeleting] = useState(false);
+
   const handleDelete = async () => {
+    const sid = student?._id || student?.id || student?.studentId;
+    if (!sid) return;
+    setDeleting(true);
     try {
-      await studentService.deleteStudent(student._id);
+      await studentService.deleteStudent(sid);
       toast.success('Student deleted successfully');
+      setShowDeleteModal(false);
       navigate('/students');
     } catch (err) {
       toast.error(err.message || 'Failed to delete student');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -149,6 +157,7 @@ export const StudentProfile = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this student record? This action cannot be undone."
       />
     </div>

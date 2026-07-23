@@ -19,6 +19,7 @@ export const StudentList = () => {
   const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchStudents());
@@ -26,6 +27,7 @@ export const StudentList = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    setDeleting(true);
     try {
       await studentService.deleteStudent(deleteId);
       toast.success('Student deleted successfully');
@@ -33,6 +35,8 @@ export const StudentList = () => {
       dispatch(fetchStudents());
     } catch (err) {
       toast.error(err.message || 'Failed to delete student');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -123,6 +127,7 @@ export const StudentList = () => {
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this student record? This cannot be undone."
       />
     </div>

@@ -294,27 +294,46 @@ export const verifyPayment = async (req, res) => {
  */
 export const recordOfflinePayment = async (req, res) => {
   try {
-    const { paymentId, paymentMethod, remarks } = req.body;
+    const { paymentId, paymentMethod, remarks, studentId, studentName, class: className, semester, feeCategory, totalAmount } = req.body;
 
-    if (!paymentId || !paymentMethod) {
-      return res.status(400).json({ success: false, message: "paymentId and paymentMethod are required" });
+    if (!paymentMethod) {
+      return res.status(400).json({ success: false, message: "paymentMethod is required" });
     }
 
-    const payment = await Payment.findById(paymentId);
-    if (!payment) {
-      return res.status(404).json({ success: false, message: "Payment not found" });
+    let payment = null;
+    if (paymentId && paymentId.match(/^[0-9a-fA-F]{24}$/)) {
+      payment = await Payment.findById(paymentId);
     }
 
-    payment.paymentStatus = "Processing";
-    payment.paymentMethod = paymentMethod;
-    payment.remarks = remarks || `Offline payment submitted. Method: ${paymentMethod}`;
-    payment.paymentDate = new Date();
-    await payment.save();
+    if (payment) {
+      payment.paymentStatus = "Processing";
+      payment.paymentMethod = paymentMethod;
+      payment.remarks = remarks || `Offline payment submitted. Method: ${paymentMethod}`;
+      payment.paymentDate = new Date();
+      await payment.save();
+    } else {
+      // Create new offline payment claim entry
+      payment = await Payment.create({
+        studentId: studentId || paymentId || "ST-OFFLINE",
+        enrollmentNumber: studentId || paymentId || "ST-OFFLINE",
+        studentName: studentName || "Student",
+        class: className || "Class 10",
+        semester: semester || "Semester 1",
+        feeCategory: feeCategory || "Tuition Fee",
+        totalAmount: Number(totalAmount) || 0,
+        paidAmount: 0,
+        dueAmount: Number(totalAmount) || 0,
+        paymentStatus: "Processing",
+        paymentMethod: paymentMethod,
+        remarks: remarks || `Offline payment logged. Method: ${paymentMethod}`,
+        paymentDate: new Date(),
+      });
+    }
 
     // Trigger Notification for Admin
     await createNotification(
       "Pending Offline Payment Verification",
-      `Student ${payment.studentName} has submitted an offline payment (${paymentMethod}) of $${payment.totalAmount} for verification.`,
+      `Student ${payment.studentName} has submitted an offline payment (${paymentMethod}) of ₹${payment.totalAmount} for verification.`,
       "Admin",
       "System Billing"
     );
@@ -323,6 +342,175 @@ export const recordOfflinePayment = async (req, res) => {
       success: true,
       message: "Offline payment logged. Awaiting administrator verification and approval.",
       payment,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Seed 10 sample offline payment verification records
+ */
+export const seedOfflinePayments = async (req, res) => {
+  try {
+    const sampleOfflinePayments = [
+      {
+        studentId: "ST-2026-0001",
+        enrollmentNumber: "ST-2026-0001",
+        studentName: "Sneha Rao",
+        class: "SY B.E",
+        semester: "Semester 3",
+        feeCategory: "Tuition Fee",
+        totalAmount: 45000,
+        paidAmount: 0,
+        dueAmount: 45000,
+        paymentStatus: "Processing",
+        paymentMethod: "Cheque",
+        remarks: "State Bank of India Cheque #409121 deposited on 20-Jul-2026",
+        paymentDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0002",
+        enrollmentNumber: "ST-2026-0002",
+        studentName: "Rahul Verma",
+        class: "Class 11",
+        semester: "Semester 1",
+        feeCategory: "Admission Fee",
+        totalAmount: 25000,
+        paidAmount: 0,
+        dueAmount: 25000,
+        paymentStatus: "Processing",
+        paymentMethod: "Bank Transfer",
+        remarks: "NEFT Ref UTR: N2026072001923 direct to school ICICI account",
+        paymentDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0003",
+        enrollmentNumber: "ST-2026-0003",
+        studentName: "Pooja Iyer",
+        class: "SY B.E",
+        semester: "Semester 4",
+        feeCategory: "Hostel Fee",
+        totalAmount: 32000,
+        paidAmount: 0,
+        dueAmount: 32000,
+        paymentStatus: "Processing",
+        paymentMethod: "Demand Draft",
+        remarks: "HDFC Bank DD #882103 payable at Mumbai main branch",
+        paymentDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0004",
+        enrollmentNumber: "ST-2026-0004",
+        studentName: "Siddharth Malhotra",
+        class: "TY B.Sc",
+        semester: "Semester 5",
+        feeCategory: "Exam Fee",
+        totalAmount: 4500,
+        paidAmount: 0,
+        dueAmount: 4500,
+        paymentStatus: "Processing",
+        paymentMethod: "Cash",
+        remarks: "Cash counter deposit slip #CS-1092 handed over to accounts desk",
+        paymentDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0005",
+        enrollmentNumber: "ST-2026-0005",
+        studentName: "Kavya Pillai",
+        class: "FY B.E",
+        semester: "Semester 1",
+        feeCategory: "Transport Fee",
+        totalAmount: 18000,
+        paidAmount: 0,
+        dueAmount: 18000,
+        paymentStatus: "Processing",
+        paymentMethod: "Bank Transfer",
+        remarks: "RTGS Ref: RTGS202607198812 for shuttle bus route #R-10",
+        paymentDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0006",
+        enrollmentNumber: "ST-2026-0006",
+        studentName: "Aditya Desai",
+        class: "Class 12",
+        semester: "Semester 2",
+        feeCategory: "Tuition Fee",
+        totalAmount: 38000,
+        paidAmount: 0,
+        dueAmount: 38000,
+        paymentStatus: "Processing",
+        paymentMethod: "Cheque",
+        remarks: "Axis Bank Cheque #100482 submitted at administrative office",
+        paymentDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0007",
+        enrollmentNumber: "ST-2026-0007",
+        studentName: "Liya Patel",
+        class: "Class 10",
+        semester: "Semester 1",
+        feeCategory: "Library Fee",
+        totalAmount: 2500,
+        paidAmount: 0,
+        dueAmount: 2500,
+        paymentStatus: "Processing",
+        paymentMethod: "Cash",
+        remarks: "Library caution deposit cash receipt #LR-4401",
+        paymentDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0008",
+        enrollmentNumber: "ST-2026-0008",
+        studentName: "Rohan Sharma",
+        class: "TY B.E",
+        semester: "Semester 6",
+        feeCategory: "Exam Fee",
+        totalAmount: 5000,
+        paidAmount: 0,
+        dueAmount: 5000,
+        paymentStatus: "Processing",
+        paymentMethod: "Demand Draft",
+        remarks: "Punjab National Bank DD #550192 for final semester examination",
+        paymentDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0009",
+        enrollmentNumber: "ST-2026-0009",
+        studentName: "Ananya Gupta",
+        class: "FY B.Sc",
+        semester: "Semester 1",
+        feeCategory: "Admission Fee",
+        totalAmount: 22000,
+        paidAmount: 0,
+        dueAmount: 22000,
+        paymentStatus: "Processing",
+        paymentMethod: "Bank Transfer",
+        remarks: "IMPS Ref: IMPS9920194821 transferred via Canara Bank netbanking",
+        paymentDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      },
+      {
+        studentId: "ST-2026-0010",
+        enrollmentNumber: "ST-2026-0010",
+        studentName: "Vikramaditya Singh",
+        class: "Class 11",
+        semester: "Semester 1",
+        feeCategory: "Uniform Fee",
+        totalAmount: 6500,
+        paidAmount: 0,
+        dueAmount: 6500,
+        paymentStatus: "Processing",
+        paymentMethod: "Cash",
+        remarks: "Cash payment for blazer and sports kit set receipt #UN-901",
+        paymentDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    const created = await Payment.insertMany(sampleOfflinePayments);
+    res.status(201).json({
+      success: true,
+      message: `Successfully seeded ${created.length} offline payment approval records!`,
+      payments: created,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

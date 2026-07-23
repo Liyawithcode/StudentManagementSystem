@@ -18,12 +18,15 @@ export const HostelList = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState(null);
+  const [vacateRoomId, setVacateRoomId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [vacating, setVacating] = useState(false);
 
-  
+
   // Forms state
   const [newRoom, setNewRoom] = useState({ roomNumber: '', block: 'Block A', type: 'Shared' });
   const [allocationForm, setAllocationForm] = useState({ roomId: '', studentId: '' });
@@ -37,7 +40,7 @@ export const HostelList = () => {
     try {
       const summaryRes = await hostelService.getHostelSummary();
       setSummary(summaryRes.summary);
-      
+
       const roomsRes = await hostelService.getRooms();
       setRooms(roomsRes.rooms || []);
     } catch (err) {
@@ -59,7 +62,7 @@ export const HostelList = () => {
         setRooms([...rooms, res.room]);
         setShowAddModal(false);
         setNewRoom({ roomNumber: '', block: 'Block A', type: 'Shared' });
-        
+
         // Refresh summary
         const summaryRes = await hostelService.getHostelSummary();
         setSummary(summaryRes.summary);
@@ -85,7 +88,7 @@ export const HostelList = () => {
         toast.success('Room allocated successfully!');
         setRooms(rooms.map(r => r._id === allocationForm.roomId ? res.room : r));
         setShowAllocateModal(false);
-        
+
         // Refresh summary
         const summaryRes = await hostelService.getHostelSummary();
         setSummary(summaryRes.summary);
@@ -97,6 +100,7 @@ export const HostelList = () => {
 
   const handleDeleteRoom = async () => {
     if (!deleteRoomId) return;
+    setDeleting(true);
     try {
       const res = await hostelService.deleteRoom(deleteRoomId);
 
@@ -104,31 +108,36 @@ export const HostelList = () => {
         toast.success('Room deleted successfully');
         setRooms(rooms.filter(r => r._id !== deleteRoomId));
         setDeleteRoomId(null);
-        
+
         // Refresh summary
         const summaryRes = await hostelService.getHostelSummary();
         setSummary(summaryRes.summary);
       }
     } catch (err) {
       toast.error(err.message || 'Failed to delete room');
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleVacateRoom = async (roomId) => {
-
-    if (!window.confirm('Vacate this hostel room?')) return;
+  const handleVacateRoom = async () => {
+    if (!vacateRoomId) return;
+    setVacating(true);
     try {
-      const res = await hostelService.vacateRoom(roomId);
+      const res = await hostelService.vacateRoom(vacateRoomId);
       if (res.success) {
         toast.success('Room vacated successfully');
-        setRooms(rooms.map(r => r._id === roomId ? res.room : r));
-        
+        setRooms(rooms.map(r => r._id === vacateRoomId ? res.room : r));
+        setVacateRoomId(null);
+
         // Refresh summary
         const summaryRes = await hostelService.getHostelSummary();
         setSummary(summaryRes.summary);
       }
     } catch (err) {
       toast.error(err.message || 'Failed to vacate room');
+    } finally {
+      setVacating(false);
     }
   };
 
@@ -227,7 +236,7 @@ export const HostelList = () => {
                         <FiUserPlus /> Allocate
                       </Button>
                     ) : (
-                      <Button variant="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleVacateRoom(room._id)}>
+                      <Button variant="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => setVacateRoomId(room._id)}>
                         <FiUserMinus /> Vacate
                       </Button>
                     )}
@@ -300,7 +309,16 @@ export const HostelList = () => {
         isOpen={!!deleteRoomId}
         onClose={() => setDeleteRoomId(null)}
         onConfirm={handleDeleteRoom}
+        loading={deleting}
         message="Are you sure you want to delete this hostel room? This cannot be undone."
+      />
+
+      <ConfirmDialog
+        isOpen={!!vacateRoomId}
+        onClose={() => setVacateRoomId(null)}
+        onConfirm={handleVacateRoom}
+        loading={vacating}
+        message="Are you sure you want to vacate this hostel room?"
       />
     </div>
   );

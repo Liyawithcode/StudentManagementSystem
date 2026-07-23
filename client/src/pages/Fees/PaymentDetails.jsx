@@ -25,14 +25,19 @@ export const PaymentDetails = () => {
   const [refundAmount, setRefundAmount] = useState("");
   const [refundRemarks, setRefundRemarks] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleDeletePayment = async () => {
+    setDeleting(true);
     try {
       await paymentService.deletePayment(id);
       toast.success("Payment ledger record deleted successfully");
+      setShowDeleteModal(false);
       navigate("/fees/payments");
     } catch (err) {
       toast.error(err.message || "Failed to delete payment record");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -73,7 +78,9 @@ export const PaymentDetails = () => {
     }
   };
 
-  const handleRefund = async (e) => {
+  const [showRefundModal, setShowRefundModal] = useState(false);
+
+  const handleRefundSubmit = (e) => {
     e.preventDefault();
     if (!refundAmount || Number(refundAmount) <= 0) {
       return toast.error("Please enter a valid refund amount");
@@ -81,9 +88,10 @@ export const PaymentDetails = () => {
     if (Number(refundAmount) > payment.paidAmount) {
       return toast.error("Refund amount cannot exceed paid amount");
     }
+    setShowRefundModal(true);
+  };
 
-    if (!window.confirm(`Are you sure you want to process a refund of $${refundAmount}? This action is irreversible.`)) return;
-
+  const handleConfirmRefund = async () => {
     setRefunding(true);
     try {
       await paymentService.refundPayment({
@@ -92,6 +100,7 @@ export const PaymentDetails = () => {
         remarks: refundRemarks,
       });
       toast.success("Refund successfully completed!");
+      setShowRefundModal(false);
       loadDetails();
     } catch (err) {
       toast.error(err.message || "Failed to process refund");
@@ -274,7 +283,7 @@ export const PaymentDetails = () => {
           {payment.paymentStatus && payment.paymentStatus.toLowerCase() === "paid" && role === "admin" && (
             <div className="mt-6">
               <Card title="Process Administrative Refund">
-                <form onSubmit={handleRefund} className="space-y-4 mt-2">
+                <form onSubmit={handleRefundSubmit} className="space-y-4 mt-2">
                   <div className="p-3 bg-danger-light text-danger rounded flex gap-2 items-start" style={{ fontSize: "0.85rem", borderLeft: "3px solid var(--danger)" }}>
                     <FiAlertTriangle size={24} style={{ flexShrink: 0 }} />
                     <span>Refunds will credit the student account and set the bill status back to Refunded / Overdue.</span>
@@ -305,7 +314,6 @@ export const PaymentDetails = () => {
                     type="submit"
                     variant="danger"
                     style={{ width: "100%" }}
-                    loading={refunding}
                   >
                     <FiCornerUpLeft /> Dispatch Refund Check
                   </Button>
@@ -320,7 +328,17 @@ export const PaymentDetails = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeletePayment}
+        loading={deleting}
         message="Are you sure you want to delete this payment ledger record? This action cannot be undone."
+      />
+
+      <ConfirmDialog
+        isOpen={showRefundModal}
+        onClose={() => setShowRefundModal(false)}
+        onConfirm={handleConfirmRefund}
+        loading={refunding}
+        title="Confirm Refund"
+        message={`Are you sure you want to process a refund of ₹${refundAmount}? This action is irreversible.`}
       />
     </div>
   );

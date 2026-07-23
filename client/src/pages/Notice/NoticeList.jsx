@@ -20,6 +20,7 @@ export const NoticeList = () => {
   const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [deleteNoticeId, setDeleteNoticeId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchNotices());
@@ -33,13 +34,16 @@ export const NoticeList = () => {
 
   const handleDelete = async () => {
     if (!deleteNoticeId) return;
+    setDeleting(true);
     try {
       await noticeService.deleteNotice(deleteNoticeId);
       toast.success('Notice deleted');
       setDeleteNoticeId(null);
       dispatch(fetchNotices());
     } catch (err) {
-      toast.error('Failed to delete notice');
+      toast.error(err.message || 'Failed to delete notice');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -97,6 +101,7 @@ export const NoticeList = () => {
         isOpen={!!deleteNoticeId}
         onClose={() => setDeleteNoticeId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this notice? This action cannot be undone."
       />
     </div>

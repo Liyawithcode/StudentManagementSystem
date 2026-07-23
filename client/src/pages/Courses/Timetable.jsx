@@ -10,6 +10,7 @@ import { courseService } from '../../services/courseService.js';
 import { teacherService } from '../../services/teacherService.js';
 import { toast } from '../../utils/toast.js';
 import { FiPlus, FiTrash2, FiClock, FiCalendar, FiMapPin, FiUser, FiInfo, FiDownload } from 'react-icons/fi';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -109,14 +110,21 @@ export const Timetable = () => {
     }
   };
 
-  const handleDeleteSlot = async (slotId) => {
-    if (!window.confirm('Are you sure you want to delete this class slot?')) return;
+  const [deleteSlotId, setDeleteSlotId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteSlot = async () => {
+    if (!deleteSlotId) return;
+    setDeleting(true);
     try {
-      await courseService.deleteTimetable(slotId);
+      await courseService.deleteTimetable(deleteSlotId);
       toast.success('Timetable slot deleted successfully');
+      setDeleteSlotId(null);
       loadTimetable();
     } catch (err) {
       toast.error(err.message || 'Failed to delete timetable slot');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -154,7 +162,7 @@ export const Timetable = () => {
               <div key={slot._id} className="card bg-glow p-4 flex flex-column justify-between position-relative" style={{ border: '1px solid var(--border-color)', borderRadius: '12px' }}>
                 {role === 'admin' && (
                   <button 
-                    onClick={() => handleDeleteSlot(slot._id)}
+                    onClick={() => setDeleteSlotId(slot._id)}
                     className="position-absolute text-danger border-none cursor-pointer p-2 bg-transparent"
                     style={{ top: '10px', right: '10px', fontSize: '1.1rem' }}
                     title="Delete Slot"
@@ -520,6 +528,14 @@ export const Timetable = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteSlotId}
+        onClose={() => setDeleteSlotId(null)}
+        onConfirm={handleDeleteSlot}
+        loading={deleting}
+        message="Are you sure you want to delete this class slot?"
+      />
     </div>
   );
 };

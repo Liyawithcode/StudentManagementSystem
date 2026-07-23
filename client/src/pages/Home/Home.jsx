@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiSun, FiMoon } from 'react-icons/fi';
+import { useAuthContext } from '../../context/AuthContext.jsx';
 import { dashboardService } from '../../services/dashboardService.js';
 import './Home.css';
 
 export const Home = () => {
+  const { isAuthenticated } = useAuthContext();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -120,8 +122,15 @@ export const Home = () => {
             <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
               {darkMode ? <FiSun /> : <FiMoon />}
             </button>
-            <Link to="/login" className="btn-nav btn-nav-login">Login</Link>
-            <Link to="/register" className="btn-nav btn-nav-register">Register</Link>
+            <Link to="/dashboard" className="btn-nav btn-nav-dashboard">
+              <i className="fa-solid fa-gauge-high"></i> Dashboard
+            </Link>
+            {!isAuthenticated && (
+              <>
+                <Link to="/login" className="btn-nav btn-nav-login">Login</Link>
+                <Link to="/register" className="btn-nav btn-nav-register">Register</Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Hamburger Toggle */}
@@ -148,8 +157,15 @@ export const Home = () => {
               {darkMode ? <><FiSun /> Light Mode</> : <><FiMoon /> Dark Mode</>}
             </button>
             <div className="mobile-nav-divider"></div>
-            <Link to="/login" className="mobile-nav-btn mobile-btn-login" onClick={closeMobileMenu}>Login</Link>
-            <Link to="/register" className="mobile-nav-btn mobile-btn-register" onClick={closeMobileMenu}>Register</Link>
+            <Link to="/dashboard" className="mobile-nav-btn mobile-btn-dashboard" onClick={closeMobileMenu}>
+              <i className="fa-solid fa-gauge-high"></i> Dashboard
+            </Link>
+            {!isAuthenticated && (
+              <>
+                <Link to="/login" className="mobile-nav-btn mobile-btn-login" onClick={closeMobileMenu}>Login</Link>
+                <Link to="/register" className="mobile-nav-btn mobile-btn-register" onClick={closeMobileMenu}>Register</Link>
+              </>
+            )}
           </nav>
         </div>
       </header>

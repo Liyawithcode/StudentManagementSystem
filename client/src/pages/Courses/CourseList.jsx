@@ -19,6 +19,7 @@ export const CourseList = () => {
   const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [deleteCourseId, setDeleteCourseId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -33,13 +34,16 @@ export const CourseList = () => {
 
   const handleDelete = async () => {
     if (!deleteCourseId) return;
+    setDeleting(true);
     try {
       await courseService.deleteCourse(deleteCourseId);
       toast.success('Course deleted');
       setDeleteCourseId(null);
       dispatch(fetchCourses());
     } catch (err) {
-      toast.error('Failed to delete course');
+      toast.error(err.message || 'Failed to delete course');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -101,6 +105,7 @@ export const CourseList = () => {
         isOpen={!!deleteCourseId}
         onClose={() => setDeleteCourseId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this course? This action cannot be undone."
       />
     </div>

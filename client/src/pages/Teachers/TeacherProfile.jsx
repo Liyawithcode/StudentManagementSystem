@@ -40,13 +40,21 @@ export const TeacherProfile = () => {
     loadProfile();
   }, [id, navigate]);
 
+  const [deleting, setDeleting] = useState(false);
+
   const handleDelete = async () => {
+    const tid = teacher?._id || teacher?.id || teacher?.facultyId;
+    if (!tid) return;
+    setDeleting(true);
     try {
-      await teacherService.deleteTeacher(teacher._id);
+      await teacherService.deleteTeacher(tid);
       toast.success('Faculty member deleted successfully');
+      setShowDeleteModal(false);
       navigate('/teachers');
     } catch (err) {
       toast.error(err.message || 'Failed to delete faculty member');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -173,6 +181,7 @@ export const TeacherProfile = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to remove this faculty record? This action cannot be undone."
       />
     </div>

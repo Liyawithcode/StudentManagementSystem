@@ -2,12 +2,15 @@ import axiosInstance from '../../config/axios.js';
 
 export const apiCall = async (method, url, data = null, options = {}) => {
   try {
-    const response = await axiosInstance({
+    const config = {
       method,
       url,
-      data,
       ...options,
-    });
+    };
+    if (data !== null && data !== undefined) {
+      config.data = data;
+    }
+    const response = await axiosInstance(config);
     return response.data;
   } catch (error) {
     let message = error.response?.data?.message;

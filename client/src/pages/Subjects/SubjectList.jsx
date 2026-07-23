@@ -19,6 +19,7 @@ export const SubjectList = () => {
   const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [deleteSubjectId, setDeleteSubjectId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(fetchSubjects());
@@ -34,13 +35,16 @@ export const SubjectList = () => {
 
   const handleDelete = async () => {
     if (!deleteSubjectId) return;
+    setDeleting(true);
     try {
       await courseService.deleteSubject(deleteSubjectId);
       toast.success('Subject deleted');
       setDeleteSubjectId(null);
       dispatch(fetchSubjects());
     } catch (err) {
-      toast.error('Failed to delete subject');
+      toast.error(err.message || 'Failed to delete subject');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -97,6 +101,7 @@ export const SubjectList = () => {
         isOpen={!!deleteSubjectId}
         onClose={() => setDeleteSubjectId(null)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this subject? This action cannot be undone."
       />
     </div>

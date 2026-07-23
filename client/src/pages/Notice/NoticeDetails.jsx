@@ -17,6 +17,7 @@ export const NoticeDetails = () => {
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -34,12 +35,16 @@ export const NoticeDetails = () => {
   }, [id]);
 
   const handleDelete = async () => {
+    setDeleting(true);
     try {
       await noticeService.deleteNotice(id);
       toast.success('Notice deleted successfully');
+      setShowDeleteModal(false);
       navigate('/notice');
     } catch (err) {
-      toast.error('Failed to delete notice');
+      toast.error(err.message || 'Failed to delete notice');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -77,6 +82,7 @@ export const NoticeDetails = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
+        loading={deleting}
         message="Are you sure you want to delete this notice? This action cannot be undone."
       />
     </div>

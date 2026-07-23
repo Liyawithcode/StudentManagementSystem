@@ -27,6 +27,7 @@ export const TransportList = () => {
   const [assignForm, setAssignForm] = useState({ routeNumber: '', studentId: '' });
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [deleteRouteId, setDeleteRouteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -120,6 +121,8 @@ export const TransportList = () => {
   };
 
   const handleDeleteRoute = async () => {
+    if (!deleteRouteId) return;
+    setDeleting(true);
     try {
       const res = await transportService.deleteRoute(deleteRouteId);
       if (res.success) {
@@ -134,6 +137,8 @@ export const TransportList = () => {
     } catch (err) {
       console.error('Error deleting route:', err);
       toast.error(err.message || 'Failed to delete route');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -367,6 +372,7 @@ export const TransportList = () => {
         isOpen={!!deleteRouteId}
         onClose={() => setDeleteRouteId(null)}
         onConfirm={handleDeleteRoute}
+        loading={deleting}
         message="Are you sure you want to delete this transport route? This cannot be undone."
       />
     </div>

@@ -19,11 +19,12 @@ export const LibraryList = () => {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  
+
   const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' or 'issues'
   const [showAddModal, setShowAddModal] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [deleteBookId, setDeleteBookId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Add Book Form state
   const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', quantity: 1 });
@@ -39,7 +40,7 @@ export const LibraryList = () => {
     try {
       const booksRes = await libraryService.getBooks();
       setBooks(booksRes.books || []);
-      
+
       // Let's mock or fetch issued logs if any
       // Since backend doesn't have list endpoint for issues, we will mock some base issues
       // and allow adding new ones which append to state.
@@ -73,6 +74,8 @@ export const LibraryList = () => {
   };
 
   const handleDeleteBook = async () => {
+    if (!deleteBookId) return;
+    setDeleting(true);
     try {
       const res = await libraryService.deleteBook(deleteBookId);
       if (res.success) {
@@ -82,6 +85,8 @@ export const LibraryList = () => {
       }
     } catch (err) {
       toast.error(err.message || 'Failed to delete book');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -94,10 +99,10 @@ export const LibraryList = () => {
       const res = await libraryService.issueBook(issueForm);
       if (res.success) {
         toast.success('Book issued successfully!');
-        
+
         // Find matching book title
         const bookObj = books.find(b => b.isbn === issueForm.isbn);
-        
+
         // Add to issues state
         const newIssue = {
           _id: res.issue?._id || `i_${Date.now()}`,
@@ -106,12 +111,12 @@ export const LibraryList = () => {
           dueDate: issueForm.dueDate,
           status: 'Issued'
         };
-        
+
         setIssues([newIssue, ...issues]);
-        
+
         // Update available quantity in books state
         setBooks(books.map(b => b.isbn === issueForm.isbn ? { ...b, availableQuantity: b.availableQuantity - 1 } : b));
-        
+
         setShowIssueModal(false);
         setIssueForm({ studentId: '', isbn: '', dueDate: '' });
       }
@@ -125,7 +130,7 @@ export const LibraryList = () => {
       const res = await libraryService.returnBook(id);
       if (res.success) {
         toast.success('Book returned successfully!');
-        
+
         // Update issues log status to returned
         setIssues(issues.map(iss => {
           if (iss._id === id) {
@@ -138,7 +143,7 @@ export const LibraryList = () => {
           }
           return iss;
         }));
-        
+
         // Refresh catalog to reflect returned book availability
         const booksRes = await libraryService.getBooks();
         setBooks(booksRes.books || []);
@@ -336,6 +341,7 @@ export const LibraryList = () => {
         isOpen={!!deleteBookId}
         onClose={() => setDeleteBookId(null)}
         onConfirm={handleDeleteBook}
+        loading={deleting}
         message="Are you sure you want to delete this book from the catalog? This cannot be undone."
       />
     </div>
