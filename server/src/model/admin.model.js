@@ -37,6 +37,25 @@ const adminSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    department: {
+      type: String,
+      trim: true,
+      default: "Administration",
+    },
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      country: String,
+    },
     status: {
       type: String,
       enum: ["Active", "Inactive"],

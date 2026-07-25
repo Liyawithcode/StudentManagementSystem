@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+
 export const getMyProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -22,8 +24,17 @@ export const updateMyProfile = async (req, res) => {
     }
 
     const user = req.user;
-    const { email, password, role, isVerified, ...updates } = req.body;
+    const { email, password, newPassword, role, isVerified, ...updates } = req.body;
 
+    if (newPassword || password) {
+      const passToSet = newPassword || password;
+      if (passToSet.length < 6) {
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+      }
+      user.password = await bcrypt.hash(passToSet, 10);
+    }
+
+    // Assign remaining update fields
     Object.assign(user, updates);
     await user.save();
 
@@ -35,3 +46,4 @@ export const updateMyProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+

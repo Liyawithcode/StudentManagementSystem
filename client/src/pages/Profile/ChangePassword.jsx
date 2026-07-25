@@ -5,6 +5,8 @@ import Input from '../../components/common/Input.jsx';
 import Button from '../../components/common/Button.jsx';
 import { toast } from '../../utils/toast.js';
 
+import { authService } from '../../services/authService.js';
+
 export const ChangePassword = () => {
   const navigate = useNavigate();
   const [oldPassword, setOldPassword] = useState('');
@@ -12,17 +14,24 @@ export const ChangePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (newPassword.length < 6) {
+      return toast.error('New password must be at least 6 characters long');
+    }
     if (newPassword !== confirmPassword) {
       return toast.error('New passwords do not match');
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await authService.updateProfile({ newPassword });
       toast.success('Password updated successfully!');
       navigate('/profile');
-    }, 1500);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err.message || 'Failed to update password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
