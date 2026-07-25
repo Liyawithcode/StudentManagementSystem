@@ -10,7 +10,7 @@ const startServer = async () => {
         app.listen(config_ENV.PORT, () => {
             console.log(`Server is running on port ${config_ENV.PORT}`);
         });
-    }catch(error){
+    } catch (error) {
         console.log('Failed to start the server:', error);
         process.exit(1);
     }
