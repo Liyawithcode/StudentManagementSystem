@@ -7,12 +7,12 @@ const startServer = async () => {
     try {
         await connectDB();
         await verifyMailConnection();
-        app.listen(config_ENV.PORT, () => {
-            console.log(`Server is running on port ${config_ENV.PORT}`);
+        const PORT = config_ENV.PORT || 5000;
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Server is running successfully on http://localhost:${PORT} and http://127.0.0.1:${PORT}`);
         });
     } catch (error) {
-        console.log('Failed to start the server:', error);
-        process.exit(1);
+        console.error('Server startup error:', error.message);
     }
 }
 

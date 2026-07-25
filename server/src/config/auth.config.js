@@ -6,7 +6,7 @@ dotenv.config();
 
 export const config_ENV = {
     PORT: process.env.PORT || 5000,
-    MONGO_URL: process.env.MONGO_URL ,
+    MONGO_URL: process.env.MONGO_URL,
     BCRYPT_SALT_ROUNDS: parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10,
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
@@ -26,7 +26,7 @@ if (!config_ENV.PORT || !config_ENV.MONGO_URL) {
     process.exit(1);
 }
 
-if(!config_ENV.EMAIL_HOST || !config_ENV.EMAIL_USER || !config_ENV.EMAIL_PASS || !config_ENV.EMAIL_PORT) {
+if (!config_ENV.EMAIL_HOST || !config_ENV.EMAIL_USER || !config_ENV.EMAIL_PASS || !config_ENV.EMAIL_PORT) {
     console.error("Missing required email environment variables. Please check your .env file.");
     process.exit(1);
 }
