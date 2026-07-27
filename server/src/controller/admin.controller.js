@@ -3,7 +3,6 @@ import { Admin } from "../model/admin.model.js";
 import { Student } from "../model/student.model.js";
 import { Faculty } from "../model/faculty.model.js";
 import { Course } from "../model/course.model.js";
-import { Fee } from "../model/fee.model.js";
 import { generateOTP, sendVerificationOtp, generateAdminId } from "../utils/index.js";
 import { config_ENV } from "../config/auth.config.js";
 
@@ -134,15 +133,13 @@ export const getStats = async (req, res) => {
         const studentCount = await Student.countDocuments();
         const facultyCount = await Faculty.countDocuments();
         const courseCount = await Course.countDocuments();
-        const pendingFeesCount = await Fee.countDocuments({ feeStatus: { $in: ["pending", "Partial"] } });
 
         res.status(200).json({
             success: true,
             stats: {
                 students: studentCount,
                 faculty: facultyCount,
-                courses: courseCount,
-                pendingFees: pendingFeesCount
+                courses: courseCount
             }
         });
     } catch (error) {
