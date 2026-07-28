@@ -254,46 +254,116 @@ export const TransportList = () => {
         </div>
 
         {/* Right: Google Map Embed */}
-        <div className="card flex flex-column gap-4">
-          <h4 style={{ fontFamily: 'Outfit', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FiMapPin style={{ color: 'var(--primary)' }} /> Route Map & Stops
-          </h4>
+        <div className="card flex flex-column" style={{ padding: '1.75rem', gap: '1.25rem' }}>
+          <div className="flex items-center justify-between" style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+            <h4 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <FiMapPin style={{ color: 'var(--primary)' }} /> Route Map & Stops
+            </h4>
+            {selectedRoute && (
+              <span className="badge badge-info flex items-center gap-1" style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem' }}>
+                🚌 {selectedRoute.vehicleNumber}
+              </span>
+            )}
+          </div>
 
           {selectedRoute ? (
-            <div className="flex flex-column gap-3">
-              <div style={{ background: 'var(--bg-app)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                <h5 style={{ fontWeight: 600, margin: '0 0 0.5rem 0' }}>Route #{selectedRoute.routeNumber} Info</h5>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <span>Vehicle: <strong>{selectedRoute.vehicleNumber}</strong></span>
-                  <span>Driver: <strong>{selectedRoute.driverName}</strong> ({selectedRoute.driverPhone || 'N/A'})</span>
-                  <span>Stops: <strong>{selectedRoute.stops?.join(' ➔ ') || 'None'}</strong></span>
+            <div className="flex flex-column" style={{ gap: '1.25rem' }}>
+              {/* Route Summary Card (Top Section) */}
+              <div style={{
+                background: 'var(--bg-app)',
+                padding: '1.25rem',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <h5 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1rem', margin: '0 0 0.6rem 0', color: 'var(--text-main)' }}>
+                  Route #{selectedRoute.routeNumber} Details
+                </h5>
+
+                <div className="grid gap-2" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  <div><strong>Driver:</strong> {selectedRoute.driverName} {selectedRoute.driverPhone ? `(${selectedRoute.driverPhone})` : ''}</div>
+                  <div><strong>Total Stops:</strong> {selectedRoute.stops?.length || 0} locations</div>
                 </div>
+
+                {/* Stop Timeline Chips */}
+                {selectedRoute.stops && selectedRoute.stops.length > 0 && (
+                  <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                      Station Stops Progression
+                    </div>
+                    <div className="flex items-center gap-2" style={{ overflowX: 'auto', paddingBottom: '0.25rem' }}>
+                      {selectedRoute.stops.map((stop, idx) => (
+                        <React.Fragment key={idx}>
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            padding: '0.35rem 0.75rem',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            fontWeight: 500,
+                            color: 'var(--text-main)',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            <span style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: 'var(--primary)',
+                              color: '#fff',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              {idx + 1}
+                            </span>
+                            {stop}
+                          </div>
+                          {idx < selectedRoute.stops.length - 1 && (
+                            <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>➔</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Google Map Iframe Embed */}
+              {/* Clean Framed Map Container (Bottom Section) */}
               {selectedRoute.stops && selectedRoute.stops.length > 0 ? (
-                <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  border: '1px solid var(--border-color)',
+                  boxShadow: 'var(--shadow-sm)',
+                  background: 'var(--bg-app)',
+                  padding: '4px'
+                }}>
                   <iframe
-                    title={`Google Map for Route ${selectedRoute.routeNumber}`}
+                    title={`Map for Route ${selectedRoute.routeNumber}`}
                     width="100%"
-                    height="320"
-                    style={{ border: 0, display: 'block' }}
+                    height="300"
+                    style={{ border: 0, borderRadius: '8px', display: 'block' }}
                     loading="lazy"
                     allowFullScreen
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedRoute.stops.join(', ') + ' Station')}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedRoute.stops.join(', ') + ' Station')}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                   ></iframe>
                 </div>
               ) : (
-                <div className="flex flex-column items-center justify-center p-6 text-center" style={{ height: '320px', background: 'var(--bg-app)', borderRadius: '12px', color: 'var(--text-muted)' }}>
+                <div className="flex flex-column items-center justify-center p-6 text-center" style={{ height: '300px', background: 'var(--bg-app)', borderRadius: '12px', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                   <FiMapPin style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.5 }} />
-                  <span>No stops defined for this route. Add stops to see Google Map location.</span>
+                  <span>No stops defined for this route. Add stops to see map view.</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-column items-center justify-center p-6 text-center" style={{ height: '400px', color: 'var(--text-muted)' }}>
+            <div className="flex flex-column items-center justify-center p-6 text-center" style={{ height: '360px', color: 'var(--text-muted)' }}>
               <FiMapPin style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }} />
-              <span>Select a transport route to inspect the stops & Google Map view.</span>
+              <span>Select a transport route to inspect the stops & map view.</span>
             </div>
           )}
         </div>
@@ -306,34 +376,34 @@ export const TransportList = () => {
             label="Route Number"
             value={newRoute.routeNumber}
             onChange={(e) => setNewRoute({ ...newRoute, routeNumber: e.target.value })}
-            placeholder="e.g. R-10, Route 5"
+            placeholder="R-10, Route 5"
             required
           />
           <Input
             label="Driver Name"
             value={newRoute.driverName}
             onChange={(e) => setNewRoute({ ...newRoute, driverName: e.target.value })}
-            placeholder="e.g. John Doe"
+            placeholder="John Doe"
             required
           />
           <Input
             label="Driver Phone"
             value={newRoute.driverPhone}
             onChange={(e) => setNewRoute({ ...newRoute, driverPhone: e.target.value })}
-            placeholder="e.g. +1234567890"
+            placeholder="+1234567890"
           />
           <Input
             label="Vehicle Number"
             value={newRoute.vehicleNumber}
             onChange={(e) => setNewRoute({ ...newRoute, vehicleNumber: e.target.value })}
-            placeholder="e.g. BUS-401, SHUTTLE-3"
+            placeholder="BUS-401, SHUTTLE-3"
             required
           />
           <Input
             label="Stops (Comma Separated)"
             value={newRoute.stopsInput}
             onChange={(e) => setNewRoute({ ...newRoute, stopsInput: e.target.value })}
-            placeholder="e.g. Main Gate, Library, Block A, Sports Complex"
+            placeholder="Main Gate, Library, Block A, Sports Complex"
           />
           <Button type="submit" variant="primary">Create Route</Button>
         </form>

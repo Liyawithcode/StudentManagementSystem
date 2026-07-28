@@ -13,8 +13,13 @@ export const Navbar = ({ toggleSidebar }) => {
   const [notificationsList, setNotificationsList] = useState([]);
 
   useEffect(() => {
-    const isDark = document.body.classList.contains('dark-theme');
-    setDarkMode(isDark);
+    const syncTheme = () => {
+      const isDark = document.body.classList.contains('dark-theme');
+      setDarkMode(isDark);
+    };
+
+    syncTheme();
+    window.addEventListener('themeChanged', syncTheme);
 
     const loadLiveNotices = async () => {
       try {
@@ -34,6 +39,10 @@ export const Navbar = ({ toggleSidebar }) => {
       }
     };
     loadLiveNotices();
+
+    return () => {
+      window.removeEventListener('themeChanged', syncTheme);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -46,6 +55,7 @@ export const Navbar = ({ toggleSidebar }) => {
       document.body.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
     }
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: nextDark ? 'dark' : 'light' } }));
   };
 
   const handleNotificationClick = () => {

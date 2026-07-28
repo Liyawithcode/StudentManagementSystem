@@ -27,6 +27,27 @@ const announcementSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isLeaveNotice: {
+      type: Boolean,
+      default: false,
+    },
+    facultyId: {
+      type: String,
+      default: "",
+    },
+    groupId: {
+      type: String,
+      default: "",
+    },
+    groupName: {
+      type: String,
+      default: "",
+    },
+    targetStudentIds: [
+      {
+        type: String,
+      },
+    ],
   },
   { timestamps: true }
 );

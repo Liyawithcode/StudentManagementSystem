@@ -9,6 +9,8 @@ import Modal from '../../components/common/Modal.jsx';
 import Button from '../../components/common/Button.jsx';
 import { Link } from 'react-router-dom';
 import { feeService } from '../../services/feeService.js';
+import { groupService } from '../../services/groupService.js';
+import { apiCall } from '../../redux/api/apiSlice.js';
 import { formatDate } from '../../utils/dateFormatter.js';
 import { formatCurrency } from '../../utils/helpers.js';
 import {
@@ -29,7 +31,8 @@ import {
   FiMapPin,
   FiGrid,
   FiFileText,
-  FiUserCheck
+  FiUserCheck,
+  FiLayers
 } from 'react-icons/fi';
 import './dashboard.css';
 
@@ -46,28 +49,70 @@ export const Dashboard = () => {
   const [calendarDate, setCalendarDate] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [studentFees, setStudentFees] = useState([]);
   const [feesLoading, setFeesLoading] = useState(false);
+  const [facultyLeaveNotices, setFacultyLeaveNotices] = useState([]);
+  const [myStudentLeaves, setMyStudentLeaves] = useState([]);
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
   }, [dispatch]);
 
-  // Fetch student fees when user is a student
+  // Fetch student fees, faculty leave notices, and student's own leaves
   useEffect(() => {
-    const loadStudentFees = async () => {
+    const loadStudentData = async () => {
       if (user?.role === 'student') {
-        const studentIdentifier = user?._id || user?.studentId;
+        const studentIdentifier = user?.studentId || user?._id;
         setFeesLoading(true);
         try {
-          const res = await feeService.getFeesByStudent(studentIdentifier);
-          setStudentFees(res.fees || []);
+          const [feeRes, notifRes, facLeaveRes, myLeaveRes] = await Promise.all([
+            feeService.getFeesByStudent(user?._id || user?.studentId).catch(() => ({ fees: [] })),
+            apiCall('get', '/communication/notifications').catch(() => null),
+            apiCall('get', '/students/faculty-leaves').catch(() => null),
+            apiCall('get', `/students/leave/${studentIdentifier}`).catch(() => null),
+          ]);
+
+          setStudentFees(feeRes?.fees || []);
+          if (myLeaveRes?.leaves) {
+            setMyStudentLeaves(myLeaveRes.leaves);
+          }
+
+          let compiledNotices = [];
+
+          // 1. From Announcement MongoDB model
+          if (notifRes?.notifications || notifRes?.notices) {
+            const list = notifRes.notifications || notifRes.notices || [];
+            const leaveAnnouncements = list.filter(
+              (n) => n.isLeaveNotice || (n.title && n.title.toLowerCase().includes('faculty leave'))
+            );
+            compiledNotices.push(...leaveAnnouncements);
+          }
+
+          // 2. From Leave MongoDB model for Faculty
+          if (facLeaveRes?.leaves && Array.isArray(facLeaveRes.leaves)) {
+            facLeaveRes.leaves.forEach((l) => {
+              const title = `Faculty Leave Notice: ${l.applicantId}`;
+              if (!compiledNotices.some((c) => c.title === title || (c.facultyId && c.facultyId === l.applicantId))) {
+                compiledNotices.push({
+                  _id: l._id,
+                  title: `Faculty Leave Notice (${l.applicantId})`,
+                  content: `Faculty member (${l.applicantId}) requested leave from ${new Date(l.startDate).toLocaleDateString()} to ${new Date(l.endDate).toLocaleDateString()}. Reason: ${l.reason}`,
+                  author: l.applicantId,
+                  createdAt: l.createdAt,
+                  status: l.status,
+                  isLeaveNotice: true,
+                });
+              }
+            });
+          }
+
+          setFacultyLeaveNotices(compiledNotices);
         } catch (err) {
-          console.error('Failed to load student fees:', err);
+          console.error('Failed to load student leave data:', err);
         } finally {
           setFeesLoading(false);
         }
       }
     };
-    loadStudentFees();
+    loadStudentData();
   }, [user]);
 
   if (loading && !stats) {
@@ -379,10 +424,23 @@ export const Dashboard = () => {
     return cells;
   };
 
-  // Filter Notices
-  const filteredNotices = displayStats.recentNotices.filter(notice => {
+  // Filter Notices (including Faculty Leave Notices)
+  const allNoticesCombined = [
+    ...facultyLeaveNotices.map((fn) => ({
+      id: fn._id || fn.id || String(Math.random()),
+      title: fn.title,
+      content: fn.content,
+      date: fn.createdAt ? new Date(fn.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      category: 'Academic',
+      postedBy: fn.author || 'Faculty Mentor',
+    })),
+    ...displayStats.recentNotices,
+  ];
+
+  const filteredNotices = allNoticesCombined.filter(notice => {
     const matchesSearch = notice.title.toLowerCase().includes(noticeSearch.toLowerCase()) ||
-      (notice.postedBy && notice.postedBy.toLowerCase().includes(noticeSearch.toLowerCase()));
+      (notice.postedBy && notice.postedBy.toLowerCase().includes(noticeSearch.toLowerCase())) ||
+      (notice.content && notice.content.toLowerCase().includes(noticeSearch.toLowerCase()));
     const matchesCategory = activeCategory === 'All' || notice.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -423,6 +481,137 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Live Premium Faculty Leave Alerts Banner for Students */}
+      {user?.role === 'student' && facultyLeaveNotices.length > 0 && (
+        <div className="faculty-leave-alert-container">
+          <div className="faculty-leave-header-row">
+            <div className="faculty-leave-title-box">
+              <div className="faculty-leave-bell-wrapper">
+                <FiBell />
+              </div>
+              <div>
+                <h4 className="faculty-leave-title-text">
+                  Faculty Leave Alerts
+                  <span className="faculty-leave-count-badge">{facultyLeaveNotices.length}</span>
+                </h4>
+                <p className="faculty-leave-subtitle">
+                  Notifications sent by faculty mentors in your assigned student groups
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-column gap-3">
+            {facultyLeaveNotices.map((notif, idx) => {
+              const authorName = notif.author || 'Faculty Mentor';
+              const initials = authorName
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+
+              return (
+                <div key={notif._id || idx} className="faculty-leave-item-card">
+                  <div className="faculty-leave-card-top">
+                    <div className="faculty-leave-avatar-box">
+                      <div className="faculty-avatar-circle">{initials}</div>
+                      <div>
+                        <h5 className="faculty-leave-item-title">{notif.title}</h5>
+                      </div>
+                    </div>
+                    <span className="faculty-on-leave-pill">
+                      <span className="pulse-dot-red" />
+                      Faculty On Leave
+                    </span>
+                  </div>
+
+                  <p
+                    style={{
+                      margin: '0 0 0.75rem 0',
+                      fontSize: '0.9rem',
+                      color: 'var(--text-main)',
+                      lineHeight: '1.5',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {notif.content}
+                  </p>
+
+                  <div className="faculty-leave-footer-row">
+                    <span>
+                      Posted by <strong>{authorName}</strong>
+                    </span>
+                    <span>
+                      <FiCalendar style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                      {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Student Personal Leave Status Section */}
+      {user?.role === 'student' && myStudentLeaves.length > 0 && (
+        <div
+          className="card mb-4"
+          style={{
+            borderLeft: '4px solid var(--primary, #3b82f6)',
+            background: 'var(--bg-card, #ffffff)',
+          }}
+        >
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <FiFileText style={{ color: 'var(--primary)', fontSize: '1.25rem' }} />
+              <h4 style={{ margin: 0, fontFamily: 'Outfit', fontWeight: 600 }}>
+                My Leave Application Status ({myStudentLeaves.length})
+              </h4>
+            </div>
+            <Link to="/leaves">
+              <span className="badge badge-info" style={{ cursor: 'pointer' }}>
+                View All Applications <FiChevronRight style={{ fontSize: '0.7rem' }} />
+              </span>
+            </Link>
+          </div>
+          <div className="flex flex-column gap-2">
+            {myStudentLeaves.slice(0, 3).map((l) => (
+              <div
+                key={l._id}
+                className="p-3 flex justify-between items-center"
+                style={{
+                  background: 'var(--bg-body, #f9fafb)',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  border: '1px solid var(--border-color, #e5e7eb)',
+                }}
+              >
+                <div>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                    Leave: {formatDate(l.startDate)} to {formatDate(l.endDate)}
+                  </strong>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+                    Reason: {l.reason}
+                  </p>
+                </div>
+                <span
+                  className={`badge ${
+                    l.status === 'Approved'
+                      ? 'badge-success'
+                      : l.status === 'Rejected'
+                      ? 'badge-danger'
+                      : 'badge-warning'
+                  }`}
+                >
+                  {l.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Role-Based Quick Actions */}
       <div className="quick-actions-card">
         <h4 className="quick-actions-title">
@@ -431,17 +620,17 @@ export const Dashboard = () => {
         <div className="quick-actions-grid">
           {user?.role === 'admin' && (
             <>
+              <Link to="/groups" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiLayers /></span>
+                <span>Student Groups</span>
+              </Link>
+              <Link to="/leaves" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
+                <span>Leave Requests</span>
+              </Link>
               <Link to="/students/add" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiPlus /></span>
+                <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiPlus /></span>
                 <span>Add Student</span>
-              </Link>
-              <Link to="/attendance/mark" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiUserCheck /></span>
-                <span>Mark Attendance</span>
-              </Link>
-              <Link to="/fees/collect" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiDollarSign /></span>
-                <span>Collect Fees</span>
               </Link>
               <Link to="/notice/add" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiBell /></span>
@@ -451,26 +640,34 @@ export const Dashboard = () => {
           )}
           {user?.role === 'faculty' && (
             <>
+              <Link to="/groups" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiLayers /></span>
+                <span>My Student Groups</span>
+              </Link>
+              <Link to="/leaves" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
+                <span>Apply for Leave</span>
+              </Link>
               <Link to="/attendance/mark" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiUserCheck /></span>
                 <span>Mark Attendance</span>
-              </Link>
-              <Link to="/attendance" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiActivity /></span>
-                <span>Attendance Logs</span>
               </Link>
               <Link to="/exams/marks" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiFileText /></span>
                 <span>Add Exam Marks</span>
               </Link>
-              <Link to="/notice/add" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiBell /></span>
-                <span>Post Announcement</span>
-              </Link>
             </>
           )}
           {user?.role === 'student' && (
             <>
+              <Link to="/groups" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiLayers /></span>
+                <span>Student Groups</span>
+              </Link>
+              <Link to="/leaves" className="quick-action-btn">
+                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
+                <span>Apply Leave</span>
+              </Link>
               <Link to="/attendance" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiActivity /></span>
                 <span>My Attendance</span>
@@ -478,14 +675,6 @@ export const Dashboard = () => {
               <Link to="/exams/result" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiBookOpen /></span>
                 <span>View Results</span>
-              </Link>
-              <Link to="/fees" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiDollarSign /></span>
-                <span>My Fee Dues</span>
-              </Link>
-              <Link to="/profile" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiUsers /></span>
-                <span>My Student Profile</span>
               </Link>
             </>
           )}

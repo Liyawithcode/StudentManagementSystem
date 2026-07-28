@@ -97,4 +97,8 @@ export const API_ENDPOINTS = {
   SETTINGS: {
     BASE: '/settings',
   },
+  GROUPS: {
+    BASE: '/groups',
+    BY_ID: (id) => `/groups/${id}`,
+  },
 };

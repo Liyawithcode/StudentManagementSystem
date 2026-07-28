@@ -917,3 +917,186 @@
 .dashboard-home-btn:hover svg {
   transform: translateX(-2px);
 }
+
+/* ===================== Faculty Leave Alert Card Premium Styles ===================== */
+.faculty-leave-alert-container {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.04) 0%, rgba(244, 63, 94, 0.07) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-left: 5px solid #ef4444;
+  border-radius: var(--radius-lg, 14px);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.08);
+  transition: all 0.3s ease;
+}
+
+.faculty-leave-alert-container:hover {
+  box-shadow: 0 14px 30px -5px rgba(239, 68, 68, 0.12);
+}
+
+.faculty-leave-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.faculty-leave-title-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.faculty-leave-bell-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  animation: pulseGlow 2s infinite;
+}
+
+.faculty-leave-title-text {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-main, #111827);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.faculty-leave-count-badge {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.faculty-leave-subtitle {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.825rem;
+  color: var(--text-muted, #6b7280);
+}
+
+.faculty-leave-item-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.faculty-leave-item-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.1);
+}
+
+.faculty-leave-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.faculty-leave-avatar-box {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.faculty-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.faculty-leave-item-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main, #111827);
+  margin: 0;
+}
+
+.faculty-on-leave-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pulse-dot-red {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc2626;
+  box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  animation: pulseRedDot 1.5s infinite;
+}
+
+@keyframes pulseRedDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.faculty-leave-info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.faculty-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-body, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--text-main, #334155);
+}
+
+.faculty-info-chip strong {
+  font-weight: 600;
+}
+
+.faculty-leave-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.775rem;
+  color: var(--text-muted, #64748b);
+  border-top: 1px dashed var(--border-color, #e2e8f0);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}

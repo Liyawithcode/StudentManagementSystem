@@ -25,6 +25,8 @@ import { dashboardRouter } from "./routes/dashboard.routes.js";
 import { settingsRouter } from "./routes/settings.routes.js";
 import { documentRouter } from "./routes/document.routes.js";
 import { facilityRouter } from "./routes/facility.routes.js";
+import { notificationRouter } from "./routes/notification.routes.js";
+import { groupRouter } from "./routes/group.routes.js";
 
 export const app = express();
 
@@ -61,6 +63,7 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/documents", documentRouter);
 app.use("/api/facilities", facilityRouter);
+app.use("/api/groups", groupRouter);
 
 // Alias to support direct registration routes
 app.use("/", authRouter);

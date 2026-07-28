@@ -2,7 +2,7 @@ import express from "express";
 import { registerStudent, loginStudent, getAllStudents, getStudent, updateStudent, deleteStudent } from "../controller/student.controller.js";
 import { getAlumniList, promoteToAlumni } from "../controller/alumni.controller.js";
 import { enrollStudentInClass, getEnrollmentHistory } from "../controller/enrollment.controller.js";
-import { applyLeave, getMyLeaveRequests } from "../controller/leave.controller.js";
+import { applyLeave, getMyLeaveRequests, getFacultyLeaveRequests } from "../controller/leave.controller.js";
 import { protect, restrictTo } from "../middleware/auth.middleware.js";
 import { validateRequest } from "../middleware/validation.middleware.js";
 
@@ -34,8 +34,9 @@ studentRouter.post("/promote-to-alumni", restrictTo("admin", "faculty"), promote
 studentRouter.post("/enroll", restrictTo("admin"), enrollStudentInClass);
 studentRouter.get("/enrollment-history/:studentId", getEnrollmentHistory);
 
-// Student Leave application
+// Student Leave application & Faculty Leave notifications for students
 studentRouter.post("/leave", applyLeave);
+studentRouter.get("/faculty-leaves", getFacultyLeaveRequests);
 studentRouter.get("/leave/:applicantId", getMyLeaveRequests);
 
 studentRouter.route("/:studentId")

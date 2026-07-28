@@ -74,6 +74,10 @@ import LibraryList from '../pages/Library/LibraryList.jsx';
 import HostelList from '../pages/Hostels/HostelList.jsx';
 import TransportList from '../pages/Transport/TransportList.jsx';
 
+// Student Grouping & Leave Management
+import GroupList from '../pages/Groups/GroupList.jsx';
+import LeaveManagement from '../pages/Leaves/LeaveManagement.jsx';
+
 // 404
 import NotFound from '../pages/NotFound/NotFound.jsx';
 
@@ -93,6 +97,10 @@ export const AppRoutes = () => {
       {/* Protected Routes */}
       <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
         <Route path="dashboard" element={<Dashboard />} />
+
+        {/* Student Groups & Leave Portal */}
+        <Route path="groups" element={<GroupList />} />
+        <Route path="leaves" element={<LeaveManagement />} />
 
         {/* Students */}
         <Route path="students" element={<StudentList />} />

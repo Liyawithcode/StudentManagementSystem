@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import {
   FiGrid, FiUsers, FiBookOpen, FiBook, FiCheckSquare,
   FiClock, FiDollarSign, FiBell, FiSettings, FiActivity, FiLogOut, FiCalendar,
-  FiHome, FiMapPin, FiMenu
+  FiHome, FiMapPin, FiLayers, FiFileText
 } from 'react-icons/fi';
 import './layout.css';
 
@@ -21,6 +21,8 @@ export const Sidebar = ({ collapsed, toggleSidebar, onNavClick }) => {
     if (role === 'admin') {
       return [
         ...common,
+        { to: '/groups', label: 'Student Groups', icon: <FiLayers /> },
+        { to: '/leaves', label: 'Leave Requests', icon: <FiFileText /> },
         { to: '/students', label: 'Students', icon: <FiUsers /> },
         { to: '/teachers', label: 'Teachers', icon: <FiUsers /> },
         { to: '/courses', label: 'Courses', icon: <FiBookOpen /> },
@@ -39,6 +41,8 @@ export const Sidebar = ({ collapsed, toggleSidebar, onNavClick }) => {
     if (role === 'faculty') {
       return [
         ...common,
+        { to: '/groups', label: 'Student Groups', icon: <FiLayers /> },
+        { to: '/leaves', label: 'Leave Portal', icon: <FiFileText /> },
         { to: '/students', label: 'Students', icon: <FiUsers /> },
         { to: '/attendance', label: 'Attendance', icon: <FiCheckSquare /> },
         { to: '/timetable', label: 'My Timetable', icon: <FiCalendar /> },
@@ -51,6 +55,8 @@ export const Sidebar = ({ collapsed, toggleSidebar, onNavClick }) => {
     if (role === 'student') {
       return [
         ...common,
+        { to: '/groups', label: 'Student Groups', icon: <FiLayers /> },
+        { to: '/leaves', label: 'My Leave Applications', icon: <FiFileText /> },
         { to: '/attendance', label: 'My Attendance', icon: <FiCheckSquare /> },
         { to: '/timetable', label: 'My Timetable', icon: <FiCalendar /> },
         { to: '/exams', label: 'My Exams', icon: <FiClock /> },
@@ -68,14 +74,15 @@ export const Sidebar = ({ collapsed, toggleSidebar, onNavClick }) => {
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      <div className="sidebar-brand flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FiBookOpen className="brand-logo" />
-          {!collapsed && <span className="brand-name">IntelliCampus</span>}
+      <div
+        className="sidebar-brand"
+        onClick={toggleSidebar}
+        title={collapsed ? 'Click logo to expand sidebar' : 'Click logo to collapse sidebar'}
+      >
+        <div className="brand-logo-wrapper">
+          <FiBookOpen className="brand-logo-icon" />
         </div>
-        <button className="sidebar-close-btn" onClick={toggleSidebar} title="Toggle Sidebar">
-          <FiMenu />
-        </button>
+        {!collapsed && <span className="brand-name">IntelliCampus</span>}
       </div>
 
       <nav className="sidebar-nav">

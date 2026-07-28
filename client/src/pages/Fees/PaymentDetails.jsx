@@ -305,7 +305,7 @@ export const PaymentDetails = () => {
                       onChange={(e) => setRefundRemarks(e.target.value)}
                       className="input"
                       style={{ width: "100%", height: "70px", padding: "0.5rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}
-                      placeholder="e.g., Course cancellation refund..."
+                      placeholder="Course cancellation refund..."
                       required
                     />
                   </div>

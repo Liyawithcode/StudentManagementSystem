@@ -8,12 +8,12 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { authService } from '../../services/authService.js';
 import { loadProfile, setAuth } from '../../redux/slices/authSlice.js';
 import { toast } from '../../utils/toast.js';
-import { 
-  FiLock, 
-  FiUser, 
-  FiEdit3, 
-  FiMail, 
-  FiShield, 
+import {
+  FiLock,
+  FiUser,
+  FiEdit3,
+  FiMail,
+  FiShield,
   FiCheckCircle,
   FiBriefcase,
   FiMapPin
@@ -98,7 +98,7 @@ export const Profile = () => {
       } else {
         dispatch(loadProfile());
       }
-      
+
       toast.success('Profile updated successfully!');
       setIsEditModalOpen(false);
     } catch (err) {
@@ -130,9 +130,9 @@ export const Profile = () => {
     }
   };
 
-  const displayName = user?.adminfullname 
-    || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() 
-    || formData.adminfullname 
+  const displayName = user?.adminfullname
+    || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+    || formData.adminfullname
     || 'Liya Patel';
 
   const userEmail = user?.email || 'patelliya04@gmail.com';
@@ -141,7 +141,7 @@ export const Profile = () => {
   const userDob = user?.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Aug 24, 1998';
   const userDept = user?.department || formData.department || 'Academic Administration';
   const userIdentifier = user?.adminid || user?.studentId || user?.facultyId || 'ADM83019';
-  
+
   const currentAddress = {
     street: user?.address?.street || formData.street || '450 Institutional Way, Bldg A',
     city: user?.address?.city || formData.city || 'Boston',
@@ -166,34 +166,35 @@ export const Profile = () => {
 
       {/* Hero Banner Card */}
       <div 
-        className="mt-6 p-8 animate-fade-in"
+        className="mt-6 animate-fade-in"
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
-          borderRadius: '20px',
+          background: 'linear-gradient(135deg, var(--bg-sidebar, #1e1b4b) 0%, var(--accent, #4c1d95) 100%)',
+          borderRadius: '18px',
+          padding: '2.25rem 2.5rem',
           color: '#ffffff',
-          boxShadow: '0 12px 35px rgba(15, 23, 42, 0.25)',
+          boxShadow: 'var(--shadow-lg, 0 10px 25px rgba(0,0,0,0.15))',
           position: 'relative',
           overflow: 'hidden'
         }}
       >
         <div className="flex items-center justify-between flex-responsive gap-6" style={{ position: 'relative', zIndex: 2 }}>
-          <div className="flex items-center gap-6 flex-responsive">
+          <div className="flex items-center gap-7 flex-responsive">
             
-            {/* Clean Avatar Circle */}
+            {/* Clean Inset Avatar Circle */}
             <div
               style={{
-                width: '95px',
-                height: '95px',
+                width: '76px',
+                height: '76px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(59, 130, 246, 0.25)',
-                color: '#60a5fa',
-                border: '3px solid rgba(255, 255, 255, 0.3)',
+                background: 'linear-gradient(135deg, var(--primary, #6366f1) 0%, var(--accent, #8b5cf6) 100%)',
+                color: '#ffffff',
+                border: '2px solid rgba(255, 255, 255, 0.35)',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2.2rem',
+                fontSize: '1.8rem',
                 fontWeight: '700',
-                boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                 flexShrink: 0,
                 letterSpacing: '1px'
               }}
@@ -202,23 +203,23 @@ export const Profile = () => {
             </div>
 
             {/* User Metadata */}
-            <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.85rem', color: '#ffffff', letterSpacing: '-0.5px' }}>
+            <div style={{ paddingLeft: '0.25rem' }}>
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <h1 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.7rem', color: '#ffffff', letterSpacing: '-0.3px', margin: 0 }}>
                   {displayName}
                 </h1>
                 <span 
                   style={{
-                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                    color: '#34d399',
+                    backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                    color: '#6ee7b7',
                     border: '1px solid rgba(52, 211, 153, 0.4)',
-                    padding: '0.3rem 0.75rem',
+                    padding: '0.3rem 0.85rem',
                     borderRadius: '20px',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                     textTransform: 'capitalize'
                   }}
                 >
@@ -226,59 +227,87 @@ export const Profile = () => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 mt-2 flex-wrap" style={{ color: '#cbd5e1', fontSize: '0.92rem' }}>
-                <span className="flex items-center gap-1.5" style={{ wordBreak: 'break-all' }}>
-                  <FiMail size={15} style={{ color: '#60a5fa' }} /> {userEmail}
+              {/* Metadata Pill Chips */}
+              <div className="flex items-center gap-3 mt-3.5 flex-wrap" style={{ color: '#e2e8f0', fontSize: '0.85rem' }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  padding: '0.4rem 0.9rem',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.18)'
+                }}>
+                  <FiMail size={14} style={{ color: '#93c5fd' }} /> {userEmail}
                 </span>
-                <span>&bull;</span>
-                <span className="flex items-center gap-1.5">
-                  <FiShield size={15} style={{ color: '#a78bfa' }} /> ID: <strong style={{ color: '#ffffff' }}>{userIdentifier}</strong>
+
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  padding: '0.4rem 0.9rem',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.18)'
+                }}>
+                  <FiShield size={14} style={{ color: '#c4b5fd' }} /> ID: <strong style={{ color: '#ffffff' }}>{userIdentifier}</strong>
                 </span>
-                <span>&bull;</span>
-                <span className="flex items-center gap-1.5">
-                  <FiBriefcase size={15} style={{ color: '#f43f5e' }} /> {userDept}
+
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  padding: '0.4rem 0.9rem',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.18)'
+                }}>
+                  <FiBriefcase size={14} style={{ color: '#fda4af' }} /> {userDept}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons: SINGLE EDIT PROFILE BUTTON */}
-          <div className="flex items-center gap-3 flex-wrap">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-4 flex-wrap" style={{ flexShrink: 0 }}>
             <button
+              type="button"
               onClick={() => setIsEditModalOpen(true)}
               style={{
                 backgroundColor: '#ffffff',
                 color: '#0f172a',
-                border: 'none',
-                padding: '0.65rem 1.25rem',
+                border: '1px solid #ffffff',
+                padding: '0.75rem 1.45rem',
                 borderRadius: '10px',
                 fontWeight: 600,
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
                 cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
               <FiEdit3 size={16} /> Edit Profile
             </button>
             <button
+              type="button"
               onClick={() => setIsPasswordModalOpen(true)}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.12)',
                 color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                padding: '0.65rem 1.25rem',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                padding: '0.75rem 1.45rem',
                 borderRadius: '10px',
                 fontWeight: 600,
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                backdropFilter: 'blur(8px)',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
               <FiLock size={16} /> Change Password
@@ -288,7 +317,7 @@ export const Profile = () => {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 mt-8 border-b" style={{ borderColor: 'var(--border-color, #e2e8f0)', paddingBottom: '2px' }}>
+      <div className="flex items-center gap-3 mt-9 border-b" style={{ borderColor: 'var(--border-color, #e2e8f0)', paddingBottom: '2px', marginBottom: '1.75rem' }}>
         {[
           { id: 'overview', label: 'Personal Information', icon: <FiUser /> },
           { id: 'account', label: 'Institutional Account', icon: <FiBriefcase /> },
@@ -319,7 +348,7 @@ export const Profile = () => {
 
       {/* Tab Content Display */}
       <div className="mt-6">
-        
+
         {/* TAB 1: Personal Information */}
         {activeTab === 'overview' && (
           <div className="card p-8 animate-fade-in" style={{ borderRadius: '16px', border: '1px solid var(--border-color, #e2e8f0)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
