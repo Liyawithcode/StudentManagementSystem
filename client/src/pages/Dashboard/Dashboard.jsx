@@ -13,6 +13,7 @@ import { groupService } from '../../services/groupService.js';
 import { apiCall } from '../../redux/api/apiSlice.js';
 import { formatDate } from '../../utils/dateFormatter.js';
 import { formatCurrency } from '../../utils/helpers.js';
+import { toast } from '../../utils/toast.js';
 import {
   FiUsers,
   FiBookOpen,
@@ -32,7 +33,11 @@ import {
   FiGrid,
   FiFileText,
   FiUserCheck,
-  FiLayers
+  FiLayers,
+  FiCheckCircle,
+  FiXCircle,
+  FiClock,
+  FiUser
 } from 'react-icons/fi';
 import './dashboard.css';
 
@@ -114,6 +119,52 @@ export const Dashboard = () => {
     };
     loadStudentData();
   }, [user]);
+
+  const [facultyLeavesList, setFacultyLeavesList] = useState([]);
+  const [isLeaveApprovalModalOpen, setIsLeaveApprovalModalOpen] = useState(false);
+  const [updatingLeaveId, setUpdatingLeaveId] = useState(null);
+
+  // Fetch faculty leave applications for faculty/admin view & approval
+  const fetchFacultyLeavesData = async () => {
+    if (user?.role === 'faculty' || user?.role === 'admin') {
+      try {
+        const res = await apiCall('get', '/faculties/leave/all').catch(() =>
+          apiCall('get', '/admins/leaves').catch(() => null)
+        );
+        if (res && res.leaves) {
+          setFacultyLeavesList(res.leaves);
+        }
+      } catch (err) {
+        console.error('Failed to fetch faculty leaves:', err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchFacultyLeavesData();
+  }, [user]);
+
+  const handleFacultyLeaveStatus = async (id, status) => {
+    setUpdatingLeaveId(id);
+    try {
+      const res = await apiCall('put', `/faculties/leave/${id}/status`, { status }).catch(() =>
+        apiCall('put', `/admins/leaves/${id}`, { status })
+      );
+      if (res && res.success) {
+        toast.success(`Faculty leave request ${status.toLowerCase()}!`);
+        setFacultyLeavesList((prev) =>
+          prev.map((item) => (item._id === id ? { ...item, status } : item))
+        );
+        dispatch(fetchDashboardStats());
+      } else {
+        toast.error(res?.message || 'Failed to update leave status');
+      }
+    } catch (err) {
+      toast.error('Error updating leave status');
+    } finally {
+      setUpdatingLeaveId(null);
+    }
+  };
 
   if (loading && !stats) {
     return <Loader />;
@@ -612,6 +663,111 @@ export const Dashboard = () => {
         </div>
       )}
 
+      {/* Faculty Leave Approval Dashboard Banner */}
+      {(user?.role === 'faculty' || user?.role === 'admin') && (
+        <div className="faculty-leave-portal-card page-entrance">
+          <div className="faculty-leave-portal-header">
+            <div className="faculty-leave-portal-title-group">
+              <div className="faculty-leave-portal-icon-wrapper">
+                <FiFileText />
+              </div>
+              <div>
+                <h4 className="faculty-leave-portal-heading">
+                  Faculty Leave Management & Approval Portal
+                </h4>
+                <p className="faculty-leave-portal-subheading">
+                  Review leave applications submitted by faculty members and grant instant approvals via popup
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => setIsLeaveApprovalModalOpen(true)}
+            >
+              <FiFileText style={{ marginRight: '6px' }} />
+              Open Leave Approval Popup ({facultyLeavesList.filter((l) => l.status === 'pending').length} Pending)
+            </Button>
+          </div>
+
+          {facultyLeavesList.length > 0 ? (
+            <div className="faculty-leave-portal-grid">
+              {facultyLeavesList.slice(0, 4).map((leave) => (
+                <div key={leave._id} className="leave-request-card">
+                  <div className="leave-card-top-row">
+                    <span className="leave-applicant-chip">
+                      <FiUser style={{ fontSize: '0.85rem' }} /> Applicant: {leave.applicantId}
+                    </span>
+                    <span
+                      className={`leave-status-pill ${
+                        leave.status === 'Approved'
+                          ? 'approved'
+                          : leave.status === 'Rejected'
+                          ? 'rejected'
+                          : 'pending'
+                      }`}
+                    >
+                      {leave.status === 'Approved' && <FiCheckCircle />}
+                      {leave.status === 'Rejected' && <FiXCircle />}
+                      {leave.status === 'pending' && <FiClock />}
+                      {leave.status}
+                    </span>
+                  </div>
+
+                  <div className="leave-dates-box">
+                    <FiCalendar className="leave-dates-icon" />
+                    <span>{formatDate(leave.startDate)} &mdash; {formatDate(leave.endDate)}</span>
+                  </div>
+
+                  <p className="leave-reason-quote" title={leave.reason}>
+                    <strong>Reason:</strong> {leave.reason}
+                  </p>
+
+                  <div className="leave-card-footer">
+                    <span>
+                      Type: <strong>{leave.applicantType || 'Faculty'}</strong>
+                    </span>
+
+                    {leave.status === 'pending' ? (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="success"
+                          size="sm"
+                          disabled={updatingLeaveId === leave._id}
+                          onClick={() => handleFacultyLeaveStatus(leave._id, 'Approved')}
+                        >
+                          <FiCheckCircle style={{ marginRight: '4px' }} /> Approve
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          disabled={updatingLeaveId === leave._id}
+                          onClick={() => handleFacultyLeaveStatus(leave._id, 'Rejected')}
+                        >
+                          <FiXCircle style={{ marginRight: '4px' }} /> Reject
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setIsLeaveApprovalModalOpen(true)}
+                      >
+                        View Details
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              No active leave applications recorded yet.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Dynamic Role-Based Quick Actions */}
       <div className="quick-actions-card">
         <h4 className="quick-actions-title">
@@ -624,10 +780,15 @@ export const Dashboard = () => {
                 <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiLayers /></span>
                 <span>Student Groups</span>
               </Link>
-              <Link to="/leaves" className="quick-action-btn">
+              <button
+                type="button"
+                onClick={() => setIsLeaveApprovalModalOpen(true)}
+                className="quick-action-btn"
+                style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+              >
                 <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
-                <span>Leave Requests</span>
-              </Link>
+                <span>Approve Faculty Leaves</span>
+              </button>
               <Link to="/students/add" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiPlus /></span>
                 <span>Add Student</span>
@@ -644,6 +805,15 @@ export const Dashboard = () => {
                 <span className="quick-action-icon" style={{ color: 'var(--primary)' }}><FiLayers /></span>
                 <span>My Student Groups</span>
               </Link>
+              <button
+                type="button"
+                onClick={() => setIsLeaveApprovalModalOpen(true)}
+                className="quick-action-btn"
+                style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+              >
+                <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
+                <span>Approve Faculty Leaves ({facultyLeavesList.filter(l => l.status === 'pending').length})</span>
+              </button>
               <Link to="/leaves" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--warning)' }}><FiFileText /></span>
                 <span>Apply for Leave</span>
@@ -651,10 +821,6 @@ export const Dashboard = () => {
               <Link to="/attendance/mark" className="quick-action-btn">
                 <span className="quick-action-icon" style={{ color: 'var(--accent)' }}><FiUserCheck /></span>
                 <span>Mark Attendance</span>
-              </Link>
-              <Link to="/exams/marks" className="quick-action-btn">
-                <span className="quick-action-icon" style={{ color: 'var(--success)' }}><FiFileText /></span>
-                <span>Add Exam Marks</span>
               </Link>
             </>
           )}
@@ -1002,6 +1168,114 @@ export const Dashboard = () => {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Faculty Leave Request Approval Modal Popup */}
+      <Modal
+        isOpen={isLeaveApprovalModalOpen}
+        onClose={() => setIsLeaveApprovalModalOpen(false)}
+        title="Faculty Leave Request Approval"
+        size="lg"
+      >
+        <div className="p-1">
+          <div className="modal-leave-summary-banner">
+            <div className="modal-leave-summary-left">
+              <div className="modal-leave-summary-icon">
+                <FiFileText />
+              </div>
+              <div>
+                <h5 className="modal-leave-summary-title">
+                  Pending Approvals ({facultyLeavesList.filter((l) => l.status === 'pending').length})
+                </h5>
+                <p className="modal-leave-summary-desc">
+                  Review faculty leave applications and take quick actions
+                </p>
+              </div>
+            </div>
+            <span className="modal-portal-chip">Faculty Portal</span>
+          </div>
+
+          {facultyLeavesList.length === 0 ? (
+            <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <FiFileText style={{ fontSize: '2.5rem', marginBottom: '0.5rem', opacity: 0.4 }} />
+              <p style={{ margin: 0 }}>No faculty leave applications found in the system.</p>
+            </div>
+          ) : (
+            <div className="flex flex-column gap-3" style={{ maxHeight: '460px', overflowY: 'auto', paddingRight: '4px' }}>
+              {facultyLeavesList.map((leave) => (
+                <div key={leave._id} className="leave-request-card">
+                  <div className="leave-card-top-row">
+                    <span className="leave-applicant-chip">
+                      <FiUser style={{ fontSize: '0.85rem' }} /> Applicant: {leave.applicantId}
+                    </span>
+                    <span
+                      className={`leave-status-pill ${
+                        leave.status === 'Approved'
+                          ? 'approved'
+                          : leave.status === 'Rejected'
+                          ? 'rejected'
+                          : 'pending'
+                      }`}
+                    >
+                      {leave.status === 'Approved' && <FiCheckCircle />}
+                      {leave.status === 'Rejected' && <FiXCircle />}
+                      {leave.status === 'pending' && <FiClock />}
+                      {leave.status}
+                    </span>
+                  </div>
+
+                  <div className="leave-dates-box">
+                    <FiCalendar className="leave-dates-icon" />
+                    <span>{formatDate(leave.startDate)} &mdash; {formatDate(leave.endDate)}</span>
+                  </div>
+
+                  <p className="leave-reason-quote">
+                    <strong>Reason:</strong> {leave.reason}
+                  </p>
+
+                  <div className="leave-card-footer">
+                    <span>
+                      Submitted: <strong>{formatDate(leave.createdAt)}</strong>
+                    </span>
+
+                    {leave.status === 'pending' ? (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="success"
+                          size="sm"
+                          disabled={updatingLeaveId === leave._id}
+                          onClick={() => handleFacultyLeaveStatus(leave._id, 'Approved')}
+                        >
+                          <FiCheckCircle style={{ marginRight: '4px' }} />
+                          {updatingLeaveId === leave._id ? 'Updating...' : 'Approve'}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          disabled={updatingLeaveId === leave._id}
+                          onClick={() => handleFacultyLeaveStatus(leave._id, 'Rejected')}
+                        >
+                          <FiXCircle style={{ marginRight: '4px' }} />
+                          {updatingLeaveId === leave._id ? 'Updating...' : 'Reject'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                        Decision: <strong style={{ textTransform: 'capitalize' }}>{leave.status}</strong>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 mt-4 pt-3" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <Button variant="secondary" onClick={() => setIsLeaveApprovalModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
       </Modal>
 
     </div>

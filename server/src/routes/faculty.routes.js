@@ -1,6 +1,6 @@
 import express from "express";
 import { registerFaculty, loginFaculty, getAllFaculties, getFacultyById, getProfile as getFacultyProfile, updateFaculty, deleteFaculty } from "../controller/faculty.controller.js";
-import { applyLeave, getMyLeaveRequests } from "../controller/leave.controller.js";
+import { applyLeave, getMyLeaveRequests, getFacultyLeaveRequests, getLeaveRequests, updateLeaveStatus } from "../controller/leave.controller.js";
 import { allocateSubjectToTeacher, getTeacherSchedules } from "../controller/teacher.controller.js";
 import { getStaffList, createStaff, deleteStaff } from "../controller/staff.controller.js";
 import { protect, restrictTo } from "../middleware/auth.middleware.js";
@@ -17,8 +17,11 @@ facultyRouter.use(protect);
 facultyRouter.get("/", getAllFaculties);
 facultyRouter.get("/profile", getFacultyProfile);
 
-// Leave application
+// Leave application & approvals
 facultyRouter.post("/leave", applyLeave);
+facultyRouter.get("/leave/all", getLeaveRequests);
+facultyRouter.get("/leave/faculty-requests", getFacultyLeaveRequests);
+facultyRouter.put("/leave/:id/status", updateLeaveStatus);
 facultyRouter.get("/leave/:applicantId", getMyLeaveRequests);
 
 // Teacher assignment and schedules

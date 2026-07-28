@@ -198,21 +198,44 @@ a:hover {
   color: var(--text-main);
 }
 
-.form-input {
+.form-input,
+.form-control {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 1rem;
   font-size: 0.875rem;
+  font-family: var(--font-sans);
   color: var(--text-main);
   background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm, 8px);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-.form-input:focus {
+.form-input:focus,
+.form-control:focus {
   outline: none;
-  border-color: var(--border-focus);
+  border-color: var(--primary);
+  background-color: var(--bg-card);
   box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+select.form-control,
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%25236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+textarea.form-control,
+textarea.form-input {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
 }
 
 .form-error {

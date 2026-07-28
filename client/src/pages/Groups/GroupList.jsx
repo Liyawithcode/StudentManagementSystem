@@ -315,6 +315,7 @@ export const GroupList = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingGroup ? 'Edit Student Group' : 'Create New Student Group'}
+        size="lg"
       >
         <form onSubmit={handleFormSubmit} className="group-form">
           <div className="form-group">
