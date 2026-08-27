@@ -30,9 +30,22 @@ import { groupRouter } from "./routes/group.routes.js";
 
 export const app = express();
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://student-management-system-ke1w.vercel.app"
+];
+
 app.use(cors({
-    origin: [config_ENV.CLIENT_URL],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS blocked: ${origin}`));
+        }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
