@@ -35,21 +35,14 @@ export const registerStudent = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOTP();
-    const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     const student = await studentService.createStudent({
       ...studentData,
       studentId: finalStudentId,
       email,
       password: hashedPassword,
-      verifyOtp: otp,
-      verifyOtpExpire: otpExpire,
-      isVerified: false,
+      isVerified: true,
     });
-
-    // Send email verification OTP
-    await sendVerificationOtp(email, otp);
 
     const accessToken = generateAccessToken(student);
     const refreshToken = generateRefreshToken(student);
@@ -63,12 +56,10 @@ export const registerStudent = async (req, res) => {
 
     const studentResponse = student.toObject();
     delete studentResponse.password;
-    delete studentResponse.verifyOtp;
-    delete studentResponse.verifyOtpExpire;
 
     res.status(201).json({
       success: true,
-      message: "Student registered successfully. Verification OTP sent to email.",
+      message: "Student registered successfully.",
       student: studentResponse,
       accessToken,
     });

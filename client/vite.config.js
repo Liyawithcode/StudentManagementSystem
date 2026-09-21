@@ -6,9 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    headers: {
+      "Cross-Origin-Opener-Policy": "unsafe-none",
+      "Cross-Origin-Embedder-Policy": "unsafe-none"
+    },
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:5000',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
         proxyTimeout: 10000,
@@ -22,7 +26,7 @@ export default defineConfig({
                   success: false,
                   message: 'Backend server is not reachable. Ensure server is running on port 5000.'
                 }));
-              } catch (_) {}
+              } catch (_) { }
             }
           });
         }

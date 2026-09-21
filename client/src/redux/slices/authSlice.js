@@ -69,10 +69,6 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.requiresOtp) {
-          state.isAuthenticated = false;
-          return;
-        }
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;

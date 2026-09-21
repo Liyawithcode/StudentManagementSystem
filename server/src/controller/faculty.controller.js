@@ -50,8 +50,6 @@ export const registerFaculty = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOTP();
-    const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     const faculty = await teacherService.createFaculty({
       ...facultyData,
@@ -63,13 +61,8 @@ export const registerFaculty = async (req, res) => {
       department,
       qualification,
       salary,
-      verifyOtp: otp,
-      verifyOtpExpire: otpExpire,
-      isVerified: false,
+      isVerified: true,
     });
-
-    // Send email verification OTP
-    await sendVerificationOtp(email, otp);
 
     const accessToken = generateAccessToken(faculty);
     const refreshToken = generateRefreshToken(faculty);
@@ -83,12 +76,10 @@ export const registerFaculty = async (req, res) => {
 
     const facultyResponse = faculty.toObject();
     delete facultyResponse.password;
-    delete facultyResponse.verifyOtp;
-    delete facultyResponse.verifyOtpExpire;
 
     res.status(201).json({
       success: true,
-      message: "Faculty registered successfully. Verification OTP sent to email.",
+      message: "Faculty registered successfully.",
       faculty: facultyResponse,
       accessToken,
     });

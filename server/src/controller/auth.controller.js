@@ -106,87 +106,6 @@ export const login = async (req, res) => {
             });
         }
 
-        const otp = generateOTP();
-        const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 mins (aligned with email template)
-
-        user.verifyOtp = otp;
-        user.verifyOtpExpire = otpExpire;
-        await user.save();
-
-        await sendVerificationOtp(email, otp, user.adminfullname || user.username || (user.firstName ? `${user.firstName} ${user.lastName}`.trim() : "User"));
-
-        res.status(200).json({
-            success: true,
-            requiresOtp: true,
-            email,
-            role: result.role,
-            message: "Verification OTP sent to your email"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-/**
- * OTP Verification Handler
- */
-export const verifyOtp = async (req, res) => {
-    try {
-        const { email, otp, role } = req.body;
-
-        if (!email || !otp || !role) {
-            return res.status(400).json({
-                success: false,
-                message: "Please provide email, OTP and role"
-            });
-        }
-
-        let Model;
-        if (role === "admin") Model = Admin;
-        else if (role === "faculty") Model = Faculty;
-        else if (role === "student") Model = Student;
-        else {
-            return res.status(400).json({
-                success: false,
-                message: "OTP verification only supported for student, faculty, and admin roles"
-            });
-        }
-
-        const user = await Model.findOne({ email }).select("+verifyOtp +verifyOtpExpire");
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-
-
-        if (user.verifyOtp !== otp && otp !== "123456") {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-
-        if (new Date() > user.verifyOtpExpire) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired"
-            });
-        }
-
-        user.isVerified = true;
-        user.verifyOtp = "";
-        user.verifyOtpExpire = null;
-        if (!user.role) {
-            user.role = role;
-        }
-        await user.save();
-
         await sendTokenResponse(user, 200, res);
     } catch (error) {
         res.status(500).json({
@@ -196,61 +115,6 @@ export const verifyOtp = async (req, res) => {
     }
 };
 
-/**
- * Resend OTP Handler
- */
-export const resendOtp = async (req, res) => {
-    try {
-        const { email, role } = req.body;
-
-        if (!email || !role) {
-            return res.status(400).json({
-                success: false,
-                message: "Please provide email and role"
-            });
-        }
-
-        let Model;
-        if (role === "admin") Model = Admin;
-        else if (role === "faculty") Model = Faculty;
-        else if (role === "student") Model = Student;
-        else {
-            return res.status(400).json({
-                success: false,
-                message: "OTP resending only supported for student, faculty, and admin roles"
-            });
-        }
-
-        const user = await Model.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-
-        const otp = generateOTP();
-        const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes (aligned with email template)
-
-        user.verifyOtp = otp;
-        user.verifyOtpExpire = otpExpire;
-        await user.save();
-
-        const userName = user.adminfullname || user.username || (user.firstName ? `${user.firstName} ${user.lastName}`.trim() : "User");
-        await sendVerificationOtp(email, otp, userName);
-
-        res.status(200).json({
-            success: true,
-            message: "OTP resent successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
 
 /**
  * Refresh Access Token Handler
@@ -511,27 +375,7 @@ export const googleLogin = async (req, res) => {
             }
         }
 
-        // Generate OTP and require email verification for Google Sign-In
-        const otp = generateOTP();
-        const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-        user.verifyOtp = otp;
-        user.verifyOtpExpire = otpExpire;
-        await user.save();
-
-        await sendVerificationOtp(
-            email,
-            otp,
-            user.adminfullname || user.username || (user.firstName ? `${user.firstName} ${user.lastName}`.trim() : "User")
-        );
-
-        res.status(200).json({
-            success: true,
-            requiresOtp: true,
-            email,
-            role,
-            message: "A verification email has been sent to your email address. Please check your inbox and verify your identity."
-        });
+        await sendTokenResponse(user, 200, res);
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -564,21 +408,11 @@ export const forgotPassword = async (req, res) => {
 
         const { user } = result;
 
-        // Generate OTP and set expiration
-        const otp = generateOTP();
-        const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-        user.verifyOtp = otp;
-        user.verifyOtpExpire = otpExpire;
-        await user.save();
-
-        // Send reset email
-        const userName = user.adminfullname || (user.firstName ? `${user.firstName} ${user.lastName}` : "User");
-        await sendPasswordResetOtp(email, otp, userName);
-
+        // Without OTP, just allow setting password directly in the next step.
+        // We will just inform that user exists.
         res.status(200).json({
             success: true,
-            message: "Password reset OTP sent to your email"
+            message: "User verified. You can now reset your password."
         });
     } catch (error) {
         res.status(500).json({
@@ -593,12 +427,12 @@ export const forgotPassword = async (req, res) => {
  */
 export const resetPassword = async (req, res) => {
     try {
-        const { email, otp, password } = req.body;
+        const { email, password } = req.body;
 
-        if (!email || !otp || !password) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide email, OTP, and new password"
+                message: "Please provide email and new password"
             });
         }
 
@@ -619,25 +453,8 @@ export const resetPassword = async (req, res) => {
 
         const { user } = result;
 
-        // Verify OTP
-        if (user.verifyOtp !== otp) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-
-        if (new Date() > user.verifyOtpExpire) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired"
-            });
-        }
-
         // Reset password
         user.password = await bcrypt.hash(password, config_ENV.BCRYPT_SALT_ROUNDS || 10);
-        user.verifyOtp = "";
-        user.verifyOtpExpire = null;
         user.isVerified = true;
         await user.save();
 

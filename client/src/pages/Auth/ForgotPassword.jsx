@@ -19,7 +19,6 @@ import './auth.css';
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [step, setStep] = useState(1);
@@ -37,13 +36,13 @@ export const ForgotPassword = () => {
     try {
       const res = await authService.forgotPassword(email);
       if (res.success) {
-        toast.success(res.message || 'Reset OTP sent to your email!');
+        toast.success(res.message || 'User verified!');
         setStep(2);
       } else {
-        toast.error(res.message || 'Failed to send recovery OTP');
+        toast.error(res.message || 'Failed to verify user');
       }
     } catch (err) {
-      toast.error(err.message || 'Error requesting reset OTP');
+      toast.error(err.message || 'Error verifying user');
     } finally {
       setLoading(false);
     }
@@ -51,7 +50,7 @@ export const ForgotPassword = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (!otp || !password || !confirmPassword) {
+    if (!password || !confirmPassword) {
       return toast.error('Please fill in all fields');
     }
     if (password !== confirmPassword) {
@@ -63,7 +62,7 @@ export const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      const res = await authService.resetPassword(email, otp, password);
+      const res = await authService.resetPassword(email, password);
       if (res.success) {
         toast.success(res.message || 'Password reset successfully!');
         navigate('/login');
@@ -94,7 +93,7 @@ export const ForgotPassword = () => {
           <div className="brand-tag">Account Security</div>
           <h1 className="brand-title">Recover Portal Access</h1>
           <p className="brand-subtitle">
-            Reset your password securely. Enter your registered institutional email to receive a 6-digit verification passkey.
+            Reset your password securely. Enter your registered institutional email to verify your identity.
           </p>
 
           <div className="features-list">
@@ -104,7 +103,7 @@ export const ForgotPassword = () => {
               </div>
               <div className="feature-text">
                 <h4>Secure Identity Verification</h4>
-                <p>One-Time Passwords (OTP) are encrypted and delivered instantly to your registered inbox.</p>
+                <p>Verify your identity and reset your password securely directly on the portal.</p>
               </div>
             </div>
 
@@ -147,8 +146,8 @@ export const ForgotPassword = () => {
             </h2>
             <p className="auth-subtitle text-center">
               {step === 1
-                ? "Enter your email address and we'll send you a password recovery code."
-                : "Enter the 6-digit OTP code sent to your email and your new password."}
+                ? "Enter your email address to verify your account."
+                : "Enter your new password."}
             </p>
 
             {step === 1 ? (
@@ -173,7 +172,7 @@ export const ForgotPassword = () => {
                 </div>
 
                 <Button type="submit" variant="primary" loading={loading} className="w-full mt-4">
-                  Send Reset OTP
+                  Verify Email
                 </Button>
 
                 <p className="auth-footer-text text-center mt-4" style={{ color: 'var(--text-muted)' }}>
@@ -198,25 +197,6 @@ export const ForgotPassword = () => {
                   </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" htmlFor="otp">OTP Verification Code <span className="text-danger">*</span></label>
-                  <div className="input-group-custom">
-                    <span className="input-icon-left">
-                      <HiOutlineKey />
-                    </span>
-                    <input
-                      type="text"
-                      id="otp"
-                      name="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="123456"
-                      className="input-custom"
-                      required
-                      maxLength={6}
-                    />
-                  </div>
-                </div>
 
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" htmlFor="password">New Password <span className="text-danger">*</span></label>

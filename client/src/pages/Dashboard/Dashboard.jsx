@@ -224,7 +224,7 @@ export const Dashboard = () => {
 
   const getRoleCards = () => {
     const role = user?.role || 'admin';
-    
+
     if (role === 'student') {
       const pendingFeesAmount = stats?.pendingFeesAmount !== undefined ? stats.pendingFeesAmount : 0;
       return [
@@ -270,7 +270,7 @@ export const Dashboard = () => {
         }
       ];
     }
-    
+
     if (role === 'faculty') {
       return [
         {
@@ -315,7 +315,7 @@ export const Dashboard = () => {
         }
       ];
     }
-    
+
     // Default: Admin
     return [
       {
@@ -363,7 +363,7 @@ export const Dashboard = () => {
 
   const getSecondaryStats = () => {
     const role = user?.role || 'admin';
-    
+
     if (role === 'student') {
       return [
         {
@@ -395,7 +395,7 @@ export const Dashboard = () => {
         }
       ];
     }
-    
+
     // Admin & Faculty
     return [
       {
@@ -507,8 +507,8 @@ export const Dashboard = () => {
             {user?.role === 'student'
               ? `Assigned Class: ${user?.class || stats?.assignedClass || 'Class 10'} • Student ID: ${user?.studentId || 'ST-2026-0001'}`
               : user?.role === 'faculty'
-              ? `Department: ${user?.department || 'General Academics'} • Faculty ID: ${user?.facultyId || 'FAC-2026-001'}`
-              : 'Welcome to your administrative command center. Real-time reports and academic updates.'}
+                ? `Department: ${user?.department || 'General Academics'} • Faculty ID: ${user?.facultyId || 'FAC-2026-001'}`
+                : 'Welcome to your administrative command center. Real-time reports and academic updates.'}
           </p>
           <div className="welcome-meta-info">
             <div className="welcome-meta-item">
@@ -647,13 +647,12 @@ export const Dashboard = () => {
                   </p>
                 </div>
                 <span
-                  className={`badge ${
-                    l.status === 'Approved'
-                      ? 'badge-success'
-                      : l.status === 'Rejected'
+                  className={`badge ${l.status === 'Approved'
+                    ? 'badge-success'
+                    : l.status === 'Rejected'
                       ? 'badge-danger'
                       : 'badge-warning'
-                  }`}
+                    }`}
                 >
                   {l.status}
                 </span>
@@ -699,13 +698,12 @@ export const Dashboard = () => {
                       <FiUser style={{ fontSize: '0.85rem' }} /> Applicant: {leave.applicantId}
                     </span>
                     <span
-                      className={`leave-status-pill ${
-                        leave.status === 'Approved'
-                          ? 'approved'
-                          : leave.status === 'Rejected'
+                      className={`leave-status-pill ${leave.status === 'Approved'
+                        ? 'approved'
+                        : leave.status === 'Rejected'
                           ? 'rejected'
                           : 'pending'
-                      }`}
+                        }`}
                     >
                       {leave.status === 'Approved' && <FiCheckCircle />}
                       {leave.status === 'Rejected' && <FiXCircle />}
@@ -851,9 +849,9 @@ export const Dashboard = () => {
       {/* Premium Stats Grid */}
       <div className="premium-stats-grid">
         {getRoleCards().map((card, idx) => (
-          <div 
-            key={idx} 
-            className="premium-stat-card" 
+          <div
+            key={idx}
+            className="premium-stat-card"
             style={{ '--stat-color': card.color, '--stat-glow-color': card.glow }}
           >
             <div className="stat-details">
@@ -891,10 +889,10 @@ export const Dashboard = () => {
       {showSecondaryStats && (
         <div className="secondary-stats-grid">
           {getSecondaryStats().map((secStat, idx) => (
-            <Link 
-              key={idx} 
-              to={secStat.link} 
-              className="premium-stat-card animate-fade-in" 
+            <Link
+              key={idx}
+              to={secStat.link}
+              className="premium-stat-card animate-fade-in"
               style={{ '--stat-color': secStat.color, '--stat-glow-color': secStat.glow }}
             >
               <div className="stat-details">
@@ -1209,13 +1207,12 @@ export const Dashboard = () => {
                       <FiUser style={{ fontSize: '0.85rem' }} /> Applicant: {leave.applicantId}
                     </span>
                     <span
-                      className={`leave-status-pill ${
-                        leave.status === 'Approved'
-                          ? 'approved'
-                          : leave.status === 'Rejected'
+                      className={`leave-status-pill ${leave.status === 'Approved'
+                        ? 'approved'
+                        : leave.status === 'Rejected'
                           ? 'rejected'
                           : 'pending'
-                      }`}
+                        }`}
                     >
                       {leave.status === 'Approved' && <FiCheckCircle />}
                       {leave.status === 'Rejected' && <FiXCircle />}

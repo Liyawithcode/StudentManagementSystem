@@ -4,7 +4,7 @@ import { Student } from "../model/student.model.js";
 import { Faculty } from "../model/faculty.model.js";
 import { Course } from "../model/course.model.js";
 import { generateOTP, sendVerificationOtp, generateAdminId } from "../utils/index.js";
-import { config_ENV } from "../config/auth.config.js";
+import { generateAccessToken, generateRefreshToken, config_ENV } from "../config/auth.config.js";
 
 /**
  * Register Admin
@@ -38,8 +38,6 @@ export const registerAdmin = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otp = generateOTP();
-        const otpExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
         const admin = await Admin.create({
             adminid: finalAdminId,
@@ -47,23 +45,27 @@ export const registerAdmin = async (req, res) => {
             email,
             password: hashedPassword,
             phone,
-            verifyOtp: otp,
-            verifyOtpExpire: otpExpire,
-            isVerified: false
+            isVerified: true
         });
 
-        // Send Email Verification OTP
-        await sendVerificationOtp(email, otp);
+        const accessToken = generateAccessToken(admin);
+        const refreshToken = generateRefreshToken(admin);
+
+        res.cookie("refreshToken", refreshToken, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
 
         const adminResponse = admin.toObject();
         delete adminResponse.password;
-        delete adminResponse.verifyOtp;
-        delete adminResponse.verifyOtpExpire;
 
         res.status(201).json({
             success: true,
-            message: "Admin registered successfully. Verification OTP sent to email.",
-            admin: adminResponse
+            message: "Admin registered successfully.",
+            admin: adminResponse,
+            accessToken
         });
     } catch (error) {
         res.status(500).json({

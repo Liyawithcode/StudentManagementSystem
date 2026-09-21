@@ -42,14 +42,8 @@ export const Login = () => {
     try {
       const resultAction = await dispatch(loginUser({ email, password, role }));
       if (loginUser.fulfilled.match(resultAction)) {
-        const payload = resultAction.payload;
-        if (payload?.requiresOtp) {
-          toast.success(payload.message || 'Verification OTP sent to your email.');
-          navigate('/verify-otp', { state: { email: payload.email, role: payload.role || role } });
-        } else {
-          toast.success('Logged in successfully!');
-          navigate('/dashboard');
-        }
+        toast.success('Logged in successfully!');
+        navigate('/dashboard');
       } else {
         toast.error(resultAction.payload || 'Login failed');
       }
@@ -97,14 +91,9 @@ export const Login = () => {
       const backendRes = await authService.googleLogin(idToken, role || 'student');
 
       if (backendRes.success) {
-        if (backendRes.requiresOtp) {
-          toast.success(backendRes.message || 'Verification OTP sent to your email.');
-          navigate('/verify-otp', { state: { email: backendRes.email, role: backendRes.role } });
-        } else {
-          dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
-          toast.success('Logged in with Google successfully!');
-          navigate('/dashboard');
-        }
+        dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
+        toast.success('Logged in with Google successfully!');
+        navigate('/dashboard');
       } else {
         toast.error(backendRes.message || 'Google login failed');
       }

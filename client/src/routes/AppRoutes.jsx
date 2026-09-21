@@ -13,7 +13,7 @@ import Login from '../pages/Auth/Login.jsx';
 import Register from '../pages/Auth/Register.jsx';
 import ForgotPassword from '../pages/Auth/ForgotPassword.jsx';
 import ResetPassword from '../pages/Auth/ResetPassword.jsx';
-import VerifyOTP from '../pages/Auth/VerifyOTP.jsx';
+
 
 // Pages
 import Dashboard from '../pages/Dashboard/Dashboard.jsx';
@@ -89,7 +89,7 @@ export const AppRoutes = () => {
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
-      <Route path="/verify-otp" element={<PublicRoute><VerifyOTP /></PublicRoute>} />
+
 
       {/* Public Landing Page */}
       <Route path="/" element={<Home />} />

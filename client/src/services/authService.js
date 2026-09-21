@@ -18,13 +18,7 @@ export const authService = {
     return apiCall('post', API_ENDPOINTS.TEACHERS.REGISTER, teacherData);
   },
 
-  verifyOtp: async (email, otp, role) => {
-    return apiCall('post', API_ENDPOINTS.AUTH.VERIFY_OTP, { email, otp, role });
-  },
 
-  resendOtp: async (email, role) => {
-    return apiCall('post', API_ENDPOINTS.AUTH.RESEND_OTP, { email, role });
-  },
 
   googleLogin: async (idToken, role) => {
     return apiCall('post', '/auth/google-login', { idToken, role });
@@ -46,7 +40,7 @@ export const authService = {
     return apiCall('post', API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
   },
 
-  resetPassword: async (email, otp, password) => {
-    return apiCall('post', API_ENDPOINTS.AUTH.RESET_PASSWORD, { email, otp, password });
+  resetPassword: async (email, password) => {
+    return apiCall('post', API_ENDPOINTS.AUTH.RESET_PASSWORD, { email, password });
   },
 };

@@ -33,7 +33,7 @@ export const AddStudent = () => {
       // Students sign up endpoint is public/register with student details
       const res = await authService.registerStudent(formData);
       if (res.success) {
-        toast.success('Student account registered! Verification OTP sent to student.');
+        toast.success('Student account registered successfully!');
         navigate('/students');
       }
     } catch (err) {

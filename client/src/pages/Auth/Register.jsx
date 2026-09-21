@@ -60,14 +60,9 @@ export const Register = () => {
 
       const backendRes = await authService.googleLogin(idToken, selectedRole);
       if (backendRes.success) {
-        if (backendRes.requiresOtp) {
-          toast.success(backendRes.message || 'Verification OTP sent to your email.');
-          navigate('/verify-otp', { state: { email: backendRes.email, role: backendRes.role } });
-        } else {
-          dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
-          toast.success('Logged in with Google successfully!');
-          navigate('/dashboard');
-        }
+        dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
+        toast.success('Logged in with Google successfully!');
+        navigate('/dashboard');
       } else {
         toast.error(backendRes.message || 'Google signup failed');
       }
@@ -113,9 +108,15 @@ export const Register = () => {
       }
 
       if (res.success) {
-        toast.success(res.message || 'Verification OTP sent to your email.');
-        // Redirect to verify OTP passing email & role
-        navigate('/verify-otp', { state: { email: formData.email, role: formData.role } });
+        if (res.accessToken) {
+          const user = res.admin || res.faculty || res.student || res.user;
+          dispatch(setAuth({ user, accessToken: res.accessToken }));
+          toast.success('Registration successful! Welcome to the dashboard.');
+          navigate('/dashboard');
+        } else {
+          toast.success(res.message || 'Registration successful! Please log in.');
+          navigate('/login');
+        }
       }
     } catch (err) {
       toast.error(err.message || 'Registration failed');

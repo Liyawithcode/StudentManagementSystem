@@ -34,7 +34,7 @@ export const AddTeacher = () => {
         department: formData.department,
       });
       if (res.success) {
-        toast.success('Faculty registered! Verification OTP sent to instructor.');
+        toast.success('Faculty registered successfully!');
         navigate('/teachers');
       }
     } catch (err) {

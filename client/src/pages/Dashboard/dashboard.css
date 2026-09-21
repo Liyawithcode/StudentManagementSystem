@@ -1349,3 +1349,51 @@
   font-size: 0.775rem;
   font-weight: 700;
 }
+
+/* Dark Theme Overrides for Faculty Leave Portal */
+body.dark-theme .faculty-leave-portal-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-theme .faculty-leave-portal-heading {
+  color: var(--text-main);
+}
+
+body.dark-theme .faculty-leave-portal-subheading {
+  color: var(--text-muted);
+}
+
+body.dark-theme .leave-request-card {
+  background: var(--bg-body);
+  border-color: var(--border-color);
+}
+
+body.dark-theme .leave-request-card:hover {
+  background: var(--bg-card);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+body.dark-theme .leave-dates-box {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+body.dark-theme .leave-reason-quote {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+body.dark-theme .modal-leave-summary-banner {
+  background: var(--bg-body);
+  border-color: var(--border-color);
+}
+
+body.dark-theme .modal-leave-summary-title {
+  color: var(--text-main);
+}
+
+body.dark-theme .modal-leave-summary-desc {
+  color: var(--text-muted);
+}

@@ -70,16 +70,6 @@ const adminSchema = new mongoose.Schema(
       default: false,
       select: false,
     },
-    verifyOtp: {
-      type: String,
-      default: "",
-      select: false,
-    },
-    verifyOtpExpire: {
-      type: Date,
-      default: null,
-      select: false,
-    },
     lastLogin: {
       type: Date,
     },
