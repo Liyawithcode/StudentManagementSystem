@@ -33,7 +33,8 @@ export const app = express();
 const allowedOrigins = [
     "http://localhost:5173",
     "https://studentmanagementsystem-dpu0.onrender.com",
-    "https://student-management-system-frontend-pp79.vercel.app"
+    "https://student-management-system-frontend-pp79.vercel.app",
+    "https://student-management-system-six-fawn.vercel.app"
 ];
 
 app.use(cors({
