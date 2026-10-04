@@ -4,12 +4,8 @@ import { useDispatch } from 'react-redux';
 import { loginUser, setAuth } from '../../redux/slices/authSlice.js';
 import Button from '../../components/common/Button.jsx';
 import { toast } from '../../utils/toast.js';
-import { FcGoogle } from 'react-icons/fc';
 import { authService } from '../../services/authService.js';
 import { FaUserGraduate, FaChalkboardTeacher, FaUserShield } from 'react-icons/fa';
-import { auth, googleProvider, signInWithPopup, db } from '../../firebase/firebase.js';
-import { getAdditionalUserInfo } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import {
   HiOutlineMail,
   HiOutlineLockClosed,
@@ -54,108 +50,7 @@ export const Login = () => {
     }
   };
 
-  const completeBackendLogin = async (user, isNewUser) => {
-    setLoading(true);
-    setLoadingText('Syncing profile details…');
 
-    if (!user.isMock) {
-      // Save/Update user profile in Firestore (non-blocking)
-      const userRef = doc(db, 'users', user.uid);
-      const profileData = {
-        uid: user.uid,
-        name: user.displayName || 'Google User',
-        email: user.email,
-        profilePhoto: user.photoURL || '',
-        loginProvider: 'google',
-        lastLogin: serverTimestamp()
-      };
-
-      if (isNewUser) {
-        profileData.createdAt = serverTimestamp();
-      }
-
-      setDoc(userRef, profileData, { merge: true })
-        .then(() => {
-          console.log('Firestore profile sync successful');
-        })
-        .catch((firestoreErr) => {
-          console.error('Firestore profile sync failed:', firestoreErr);
-        });
-    } else {
-      console.log('Skipping Firestore sync for mock developer login.');
-    }
-
-    setLoadingText('Authenticating securely...');
-    try {
-      const idToken = await user.getIdToken();
-      const backendRes = await authService.googleLogin(idToken, role || 'student');
-
-      if (backendRes.success) {
-        dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
-        toast.success('Logged in with Google successfully!');
-        navigate('/dashboard');
-      } else {
-        toast.error(backendRes.message || 'Google login failed');
-      }
-    } catch (backendErr) {
-      toast.error(backendErr.message || 'Backend authentication failed.');
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setLoadingText('Verifying your identity…');
-
-    // Display helper text if login takes time
-    const phonePromptTimer = setTimeout(() => {
-      setLoadingText("Check your phone to confirm it's you.");
-    }, 4000);
-
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      clearTimeout(phonePromptTimer);
-
-      const user = result.user;
-      const additionalInfo = getAdditionalUserInfo(result);
-      const isNewUser = additionalInfo?.isNewUser;
-
-      await completeBackendLogin(user, isNewUser);
-    } catch (err) {
-      clearTimeout(phonePromptTimer);
-      console.warn('Firebase Google Sign-In failed or popup was closed:', err);
-
-      // In development mode, automatically fallback to mock login if Firebase Google Auth is unconfigured or fails
-      if (import.meta.env.DEV) {
-        toast.info('Google Auth unconfigured or failed in Firebase. Using Developer Mock Login...');
-        const mockUser = {
-          uid: 'mock_google_uid',
-          displayName: `Mock Google ${role.charAt(0).toUpperCase() + role.slice(1)}`,
-          email: `google_${role}_test@example.com`,
-          photoURL: '',
-          getIdToken: async () => 'mock_google_id_token',
-          isMock: true
-        };
-        await completeBackendLogin(mockUser, true);
-        return;
-      }
-
-      // Detailed error handling for production
-      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        toast.error('Google Sign-In was cancelled or popup closed.');
-      } else if (err.code === 'auth/network-request-failed') {
-        toast.error('Network error: Please check your internet connection.');
-      } else if (err.code === 'auth/unauthorized-domain') {
-        toast.error('Unauthorized domain: This domain is not configured in Firebase Console.');
-      } else if (err.code === 'auth/invalid-oauth-client-id') {
-        toast.error('OAuth Client ID error: Please enable Google Provider in Firebase Console.');
-      } else {
-        toast.error(err.message || 'Firebase authentication error.');
-      }
-    } finally {
-      setLoading(false);
-      setLoadingText('');
-    }
-  };
 
   return (
     <div className="login-split-container">
@@ -347,20 +242,7 @@ export const Login = () => {
                 Sign In
               </Button>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '1.25rem 0', color: 'var(--text-muted)' }}>
-                <span style={{ borderBottom: '1px solid var(--border-color)', flex: 1 }}></span>
-                <span style={{ padding: '0 10px', fontSize: '0.85rem', fontWeight: 600 }}>OR</span>
-                <span style={{ borderBottom: '1px solid var(--border-color)', flex: 1 }}></span>
-              </div>
 
-              <Button
-                variant="secondary"
-                loading={loading}
-                className="w-full flex items-center justify-center gap-2"
-                onClick={handleGoogleLogin}
-              >
-                {!loading && <FcGoogle style={{ fontSize: '1.25rem' }} />} Continue with Google
-              </Button>
               <p className="auth-footer-text text-center mt-4" style={{ color: 'var(--text-muted)' }}>
                 New user? <Link to="/register" style={{ fontWeight: 600 }}>Create an account</Link>
               </p>

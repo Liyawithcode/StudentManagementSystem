@@ -5,8 +5,7 @@ import { setAuth } from '../../redux/slices/authSlice.js';
 import Button from '../../components/common/Button.jsx';
 import { authService } from '../../services/authService.js';
 import { toast } from '../../utils/toast.js';
-import { auth, googleProvider, signInWithPopup } from '../../firebase/firebase.js';
-import { FcGoogle } from 'react-icons/fc';
+
 import { FaUserGraduate, FaChalkboardTeacher, FaUserShield } from 'react-icons/fa';
 import {
   HiOutlineMail,
@@ -38,41 +37,7 @@ export const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleGoogleLogin = async () => {
-    const selectedRole = formData.role || 'student';
-    setLoading(true);
-    try {
-      toast.info('Authenticating with Google...');
-      let idToken;
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        idToken = await user.getIdToken();
-      } catch (popupErr) {
-        console.warn('Google popup sign-in failed or closed:', popupErr);
-        if (import.meta.env.DEV) {
-          toast.info('Google Auth unconfigured or failed in Firebase. Using Developer Mock Login...');
-          idToken = 'mock_google_id_token';
-        } else {
-          throw popupErr;
-        }
-      }
 
-      const backendRes = await authService.googleLogin(idToken, selectedRole);
-      if (backendRes.success) {
-        dispatch(setAuth({ user: backendRes.user, accessToken: backendRes.accessToken }));
-        toast.success('Logged in with Google successfully!');
-        navigate('/dashboard');
-      } else {
-        toast.error(backendRes.message || 'Google signup failed');
-      }
-    } catch (err) {
-      console.error('Google signup failed:', err);
-      toast.error(err.message || 'Google Sign-In failed or was cancelled');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -389,19 +354,7 @@ export const Register = () => {
                 Submit Registration
               </Button>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '1.25rem 0', color: 'var(--text-muted)' }}>
-                <span style={{ borderBottom: '1px solid var(--border-color)', flex: 1 }}></span>
-                <span style={{ padding: '0 10px', fontSize: '0.85rem', fontWeight: 600 }}>OR</span>
-                <span style={{ borderBottom: '1px solid var(--border-color)', flex: 1 }}></span>
-              </div>
 
-              <button
-                type="button"
-                className="btn btn-secondary w-full flex items-center justify-center gap-2"
-                onClick={handleGoogleLogin}
-              >
-                <FcGoogle style={{ fontSize: '1.25rem' }} /> Sign up with Google
-              </button>
 
               <p className="auth-footer-text text-center mt-4" style={{ color: 'var(--text-muted)' }}>
                 Already have an account? <Link to="/login" style={{ fontWeight: 600 }}>Sign In</Link>
